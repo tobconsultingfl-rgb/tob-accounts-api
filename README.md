@@ -78,8 +78,9 @@ This solution follows **Clean Architecture** principles with clear separation of
 
 ### CRUD Operations
 - **Accounts**: Create, Read, Update, Delete (soft delete)
-- **Contacts**: Create, Read, Update, Delete (soft delete)
+- **Contacts**: Create, Read, Update, Delete (soft delete) - nested under accounts
 - One-to-many relationship (Account → Contacts)
+- RESTful nested routes: `/api/accounts/{accountId}/contacts`
 
 ### Security Features
 - Microsoft Entra External ID authentication
@@ -312,16 +313,19 @@ curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
 
 #### Contacts
 
+Contacts are nested under accounts in the API hierarchy. All contact operations require a valid `accountId`.
+
 | Method | Endpoint | Description | Access |
 |--------|----------|-------------|--------|
-| GET | `/api/contacts` | Get all contacts for user's tenant | Authenticated |
-| GET | `/api/contacts?tenantId={guid}` | Get contacts for specific tenant | Super Admin only |
-| GET | `/api/contacts/{id}` | Get contact by ID | Authenticated (tenant-scoped) |
-| POST | `/api/contacts` | Create new contact | Authenticated |
-| PUT | `/api/contacts/{id}` | Update contact | Authenticated (tenant-scoped) |
-| DELETE | `/api/contacts/{id}` | Soft delete contact | Authenticated (tenant-scoped) |
+| GET | `/api/accounts/{accountId}/contacts` | Get all contacts for an account | Authenticated (account must belong to user's tenant) |
+| GET | `/api/accounts/{accountId}/contacts/{id}` | Get contact by ID | Authenticated (account and contact must belong to user's tenant) |
+| POST | `/api/accounts/{accountId}/contacts` | Create new contact for account | Authenticated (account must belong to user's tenant) |
+| PUT | `/api/accounts/{accountId}/contacts/{id}` | Update contact | Authenticated (account and contact must belong to user's tenant) |
+| DELETE | `/api/accounts/{accountId}/contacts/{id}` | Soft delete contact | Authenticated (account and contact must belong to user's tenant) |
 
-### Sample Request
+**Note:** Super Admins can access contacts for accounts in any tenant.
+
+### Sample Requests
 
 **Create Account**
 ```bash
@@ -344,6 +348,35 @@ Content-Type: application/json
 }
 ```
 
+**Create Contact for Account**
+```bash
+POST /api/accounts/{account-guid}/contacts
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "tenantId": "tenant-guid",
+  "accountId": "account-guid",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@acme.com",
+  "phoneNumber": "+1-555-0101",
+  "mobileNumber": "+1-555-0102",
+  "addressLine1": "456 Oak Ave",
+  "city": "Boston",
+  "state": "MA",
+  "postalCode": "02101",
+  "country": "USA",
+  "createdBy": "user@example.com"
+}
+```
+
+**Get All Contacts for Account**
+```bash
+GET /api/accounts/{account-guid}/contacts
+Authorization: Bearer {token}
+```
+
 ## Security
 
 ### Authentication Flow
@@ -358,12 +391,14 @@ Content-Type: application/json
 
 **Regular Users:**
 - Can only access data within their own tenant (from `extension_TenantId` claim)
-- Cannot specify `tenantId` query parameter
-- Create/Update/Delete operations validated against their tenant
+- Cannot specify `tenantId` query parameter on accounts endpoints
+- Can only access contacts for accounts that belong to their tenant
+- All Create/Update/Delete operations validated against their tenant
 
 **Super Admin:**
 - Can access data across all tenants
-- Can specify `tenantId` query parameter on GET operations
+- Can specify `tenantId` query parameter on accounts GET operations
+- Can access contacts for any account regardless of tenant
 - No tenant validation on Create/Update/Delete operations
 
 ### Tenant Isolation
@@ -372,6 +407,7 @@ Content-Type: application/json
 - All GET operations filtered by tenant (unless Super Admin)
 - All Create operations validate tenant matches user's claim (unless Super Admin)
 - All Update/Delete operations verify resource belongs to user's tenant (unless Super Admin)
+- Contact operations validate that the parent account belongs to user's tenant
 - Returns 404 (not 403) for unauthorized cross-tenant access to prevent information disclosure
 
 ## Deployment

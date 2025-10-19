@@ -6,20 +6,12 @@ namespace TOB.Accounts.Infrastructure.Repositories;
 public interface IContactRepository
 {
     /// <summary>
-    /// Get all contacts
-    /// </summary>
-    /// <param name="tenantId">Tenant ID</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Collection of contacts</returns>
-    Task<IEnumerable<ContactDto>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default);
-
-    /// <summary>
     /// Get all contacts for a specific account
     /// </summary>
     /// <param name="accountId">Account ID</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>Collection of contacts for the account</returns>
-    Task<IEnumerable<ContactDto>> GetByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ContactDto>> GetAllAsync(Guid accountId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Get contact by ID

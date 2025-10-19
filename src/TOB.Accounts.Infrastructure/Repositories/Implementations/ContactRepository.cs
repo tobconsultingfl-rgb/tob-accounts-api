@@ -15,16 +15,7 @@ public class ContactRepository : IContactRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<ContactDto>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default)
-    {
-        var contacts = await _context.Contacts
-            .Where(c => c.TenantId == tenantId.ToString())
-            .ToListAsync(cancellationToken);
-
-        return contacts.ToDtoList();
-    }
-
-    public async Task<IEnumerable<ContactDto>> GetByAccountIdAsync(Guid accountId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ContactDto>> GetAllAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
         var contacts = await _context.Contacts
             .Where(c => c.AccountId == accountId)

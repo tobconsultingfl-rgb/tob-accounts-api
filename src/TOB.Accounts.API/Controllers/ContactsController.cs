@@ -8,7 +8,7 @@ using TOB.Accounts.Domain.Responses;
 namespace TOB.Accounts.API.Controllers;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/accounts/{accountId}/contacts")]
 public class ContactsController : BaseController
 {
     private readonly ILogger<ContactsController> _logger;
@@ -21,45 +21,45 @@ public class ContactsController : BaseController
     }
 
     /// <summary>
-    /// Get all contacts
+    /// Get all contacts for a specific account
     /// </summary>
-    /// <param name="tenantId">Optional Tenant ID (Super Admin only)</param>
-    /// <returns>List of contacts</returns>
+    /// <param name="accountId">Account ID from route</param>
+    /// <returns>List of contacts for the account</returns>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<IEnumerable<ContactResponse>>> GetContactsAsync([FromQuery] Guid? tenantId = null)
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<ContactResponse>>> GetContactsAsync([FromRoute] Guid accountId)
     {
         var isSuperAdmin = CurrentUserRoles?.Contains("Super Admin") ?? false;
-        Guid effectiveTenantId;
 
-        if (tenantId.HasValue)
+        // Verify the account exists and belongs to the user's tenant (unless Super Admin)
+        if (!isSuperAdmin)
         {
-            // Only Super Admins can specify a different tenant ID
-            if (!isSuperAdmin)
-            {
-                return Forbid();
-            }
-            effectiveTenantId = tenantId.Value;
-        }
-        else
-        {
-            // Use the current user's tenant ID
             if (string.IsNullOrWhiteSpace(CurrentUserTenantId))
             {
                 return Unauthorized("Tenant ID not found in user claims");
             }
 
-            if (!Guid.TryParse(CurrentUserTenantId, out effectiveTenantId))
+            // Verify account belongs to user's tenant
+            var accountQuery = new GetAccountByIdQuery { AccountId = accountId };
+            var account = await _mediator.Send(accountQuery);
+
+            if (account == null)
             {
-                return BadRequest("Invalid Tenant ID format");
+                return NotFound("Account not found");
+            }
+
+            if (account.TenantId != CurrentUserTenantId)
+            {
+                return NotFound("Account not found");
             }
         }
 
-        _logger.LogInformation("Getting all contacts for tenant {TenantId}", effectiveTenantId);
+        _logger.LogInformation("Getting all contacts for account {AccountId}", accountId);
 
-        var query = new GetAllContactsQuery { TenantId = effectiveTenantId };
+        var query = new GetAllContactsQuery { AccountId = accountId };
         var contacts = await _mediator.Send(query);
 
         var response = contacts.Select(c => ContactResponse.FromDto(c));
@@ -69,13 +69,14 @@ public class ContactsController : BaseController
     /// <summary>
     /// Get contact by ID
     /// </summary>
+    /// <param name="accountId">Account ID from route</param>
     /// <param name="id">Contact ID</param>
     /// <returns>Contact details</returns>
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<ContactResponse>> GetContactAsync(Guid id)
+    public async Task<ActionResult<ContactResponse>> GetContactAsync([FromRoute] Guid accountId, Guid id)
     {
         var isSuperAdmin = CurrentUserRoles?.Contains("Super Admin") ?? false;
 
@@ -84,12 +85,18 @@ public class ContactsController : BaseController
             return Unauthorized("Tenant ID not found in user claims");
         }
 
-        _logger.LogInformation("Getting contact with ID: {ContactId}", id);
+        _logger.LogInformation("Getting contact with ID: {ContactId} for account {AccountId}", id, accountId);
 
         var query = new GetContactByIdQuery { ContactId = id };
         var contact = await _mediator.Send(query);
 
         if (contact == null)
+        {
+            return NotFound();
+        }
+
+        // Verify the contact belongs to the specified account
+        if (contact.AccountId != accountId)
         {
             return NotFound();
         }
@@ -106,6 +113,7 @@ public class ContactsController : BaseController
     /// <summary>
     /// Create a new contact
     /// </summary>
+    /// <param name="accountId">Account ID from route</param>
     /// <param name="command">Contact data</param>
     /// <returns>Created contact</returns>
     [HttpPost]
@@ -113,9 +121,15 @@ public class ContactsController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<ActionResult<ContactResponse>> CreateContactAsync([FromBody] CreateContactCommand command)
+    public async Task<ActionResult<ContactResponse>> CreateContactAsync([FromRoute] Guid accountId, [FromBody] CreateContactCommand command)
     {
         var isSuperAdmin = CurrentUserRoles?.Contains("Super Admin") ?? false;
+
+        // Validate accountId matches the command
+        if (accountId != command.AccountId)
+        {
+            return BadRequest("Account ID in route does not match Account ID in request body");
+        }
 
         // Regular users can only create contacts for their own tenant
         if (!isSuperAdmin)
@@ -131,17 +145,18 @@ public class ContactsController : BaseController
             }
         }
 
-        _logger.LogInformation("Creating new contact for tenant {TenantId}", command.TenantId);
+        _logger.LogInformation("Creating new contact for account {AccountId}", accountId);
 
         var contact = await _mediator.Send(command);
         var response = ContactResponse.FromDto(contact);
 
-        return CreatedAtAction(nameof(GetContactAsync), new { id = contact.ContactId }, response);
+        return CreatedAtAction(nameof(GetContactAsync), new { accountId = accountId, id = contact.ContactId }, response);
     }
 
     /// <summary>
     /// Update an existing contact
     /// </summary>
+    /// <param name="accountId">Account ID from route</param>
     /// <param name="id">Contact ID</param>
     /// <param name="command">Updated contact data</param>
     /// <returns>No content</returns>
@@ -151,7 +166,7 @@ public class ContactsController : BaseController
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> UpdateContactAsync(Guid id, [FromBody] UpdateContactCommand command)
+    public async Task<IActionResult> UpdateContactAsync([FromRoute] Guid accountId, Guid id, [FromBody] UpdateContactCommand command)
     {
         var isSuperAdmin = CurrentUserRoles?.Contains("Super Admin") ?? false;
 
@@ -176,13 +191,19 @@ public class ContactsController : BaseController
                 return NotFound();
             }
 
+            // Verify contact belongs to the specified account
+            if (existingContact.AccountId != accountId)
+            {
+                return NotFound();
+            }
+
             if (existingContact.TenantId != CurrentUserTenantId)
             {
                 return NotFound();
             }
         }
 
-        _logger.LogInformation("Updating contact with ID: {ContactId}", id);
+        _logger.LogInformation("Updating contact with ID: {ContactId} for account {AccountId}", id, accountId);
 
         var contact = await _mediator.Send(command);
 
@@ -197,6 +218,7 @@ public class ContactsController : BaseController
     /// <summary>
     /// Delete a contact
     /// </summary>
+    /// <param name="accountId">Account ID from route</param>
     /// <param name="id">Contact ID</param>
     /// <param name="deletedBy">User deleting the contact</param>
     /// <returns>No content</returns>
@@ -205,7 +227,7 @@ public class ContactsController : BaseController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public async Task<IActionResult> DeleteContactAsync(Guid id, [FromQuery] string deletedBy)
+    public async Task<IActionResult> DeleteContactAsync([FromRoute] Guid accountId, Guid id, [FromQuery] string deletedBy)
     {
         var isSuperAdmin = CurrentUserRoles?.Contains("Super Admin") ?? false;
 
@@ -225,13 +247,19 @@ public class ContactsController : BaseController
                 return NotFound();
             }
 
+            // Verify contact belongs to the specified account
+            if (existingContact.AccountId != accountId)
+            {
+                return NotFound();
+            }
+
             if (existingContact.TenantId != CurrentUserTenantId)
             {
                 return NotFound();
             }
         }
 
-        _logger.LogInformation("Deleting contact with ID: {ContactId}", id);
+        _logger.LogInformation("Deleting contact with ID: {ContactId} for account {AccountId}", id, accountId);
 
         var command = new DeleteContactCommand { ContactId = id, DeletedBy = deletedBy };
         var result = await _mediator.Send(command);

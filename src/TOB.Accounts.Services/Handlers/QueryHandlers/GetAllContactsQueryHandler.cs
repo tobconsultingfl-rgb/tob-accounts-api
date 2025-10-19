@@ -16,6 +16,6 @@ public class GetAllContactsQueryHandler : IRequestHandler<GetAllContactsQuery, I
 
     public async Task<IEnumerable<ContactDto>> Handle(GetAllContactsQuery request, CancellationToken cancellationToken)
     {
-        return await _contactRepository.GetAllAsync(request.TenantId, cancellationToken);
+        return await _contactRepository.GetAllAsync(request.AccountId, cancellationToken);
     }
 }

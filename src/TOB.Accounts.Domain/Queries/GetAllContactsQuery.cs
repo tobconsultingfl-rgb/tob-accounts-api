@@ -5,5 +5,5 @@ namespace TOB.Accounts.Domain.Queries;
 
 public class GetAllContactsQuery : IRequest<IEnumerable<ContactDto>>
 {
-    public Guid TenantId { get; set; }
+    public Guid AccountId { get; set; }
 }
