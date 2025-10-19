@@ -32,15 +32,19 @@ builder.Services.AddOptions<OpenTelemetryOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-// Configure OpenTelemetry
-var serviceName = Diagnostics.ServiceName;
-var serviceVersion = Diagnostics.ServiceVersion;
-var otlpEndpoint = builder.Configuration["OpenTelemetry:OtlpEndpoint"] ?? "http://localhost:4317";
-var useConsoleExporter = builder.Configuration.GetValue<bool>("OpenTelemetry:UseConsoleExporter");
+builder.Services.AddOptions<CorsOptions>()
+    .Bind(builder.Configuration.GetSection(CorsOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
 
+// Get configuration options
+var otelOptions = builder.Configuration.GetSection(OpenTelemetryOptions.SectionName).Get<OpenTelemetryOptions>()!;
+var corsOptions = builder.Configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>()!;
+
+// Configure OpenTelemetry
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(resource => resource
-        .AddService(serviceName, serviceVersion: serviceVersion)
+        .AddService(otelOptions.ServiceName, serviceVersion: otelOptions.ServiceVersion)
         .AddAttributes(new Dictionary<string, object>
         {
             ["deployment.environment"] = builder.Environment.EnvironmentName,
@@ -48,6 +52,8 @@ builder.Services.AddOpenTelemetry()
         }))
     .WithTracing(tracing =>
     {
+        if (!otelOptions.EnableTracing) return;
+
         tracing
             .AddAspNetCoreInstrumentation(options =>
             {
@@ -80,7 +86,7 @@ builder.Services.AddOpenTelemetry()
             })
             .AddSource(Diagnostics.ActivitySource.Name);
 
-        if (useConsoleExporter)
+        if (otelOptions.UseConsoleExporter)
         {
             tracing.AddConsoleExporter();
         }
@@ -88,19 +94,21 @@ builder.Services.AddOpenTelemetry()
         {
             tracing.AddOtlpExporter(options =>
             {
-                options.Endpoint = new Uri(otlpEndpoint);
+                options.Endpoint = new Uri(otelOptions.OtlpEndpoint);
             });
         }
     })
     .WithMetrics(metrics =>
     {
+        if (!otelOptions.EnableMetrics) return;
+
         metrics
             .AddAspNetCoreInstrumentation()
             .AddHttpClientInstrumentation()
             .AddRuntimeInstrumentation()
             .AddMeter(Diagnostics.Meter.Name);
 
-        if (useConsoleExporter)
+        if (otelOptions.UseConsoleExporter)
         {
             metrics.AddConsoleExporter();
         }
@@ -108,37 +116,94 @@ builder.Services.AddOpenTelemetry()
         {
             metrics.AddOtlpExporter(options =>
             {
-                options.Endpoint = new Uri(otlpEndpoint);
+                options.Endpoint = new Uri(otelOptions.OtlpEndpoint);
             });
         }
     });
 
 // Configure OpenTelemetry Logging
-builder.Logging.AddOpenTelemetry(logging =>
+if (otelOptions.EnableLogging)
 {
-    logging.IncludeFormattedMessage = true;
-    logging.IncludeScopes = true;
+    builder.Logging.AddOpenTelemetry(logging =>
+    {
+        logging.IncludeFormattedMessage = true;
+        logging.IncludeScopes = true;
 
-    if (useConsoleExporter)
-    {
-        logging.AddConsoleExporter();
-    }
-    else
-    {
-        logging.AddOtlpExporter(options =>
+        if (otelOptions.UseConsoleExporter)
         {
-            options.Endpoint = new Uri(otlpEndpoint);
-        });
-    }
-});
+            logging.AddConsoleExporter();
+        }
+        else
+        {
+            logging.AddOtlpExporter(options =>
+            {
+                options.Endpoint = new Uri(otelOptions.OtlpEndpoint);
+            });
+        }
+    });
+}
 
 // Add Global Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Add DbContext
-builder.Services.AddDbContext<AccountsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(CorsOptions.DefaultPolicyName, policy =>
+    {
+        var allowedOrigins = corsOptions.GetAllowedOrigins();
+
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins);
+        }
+        else
+        {
+            policy.AllowAnyOrigin();
+        }
+
+        var allowedMethods = corsOptions.GetAllowedMethods();
+        if (allowedMethods != null && allowedMethods.Length > 0)
+        {
+            policy.WithMethods(allowedMethods);
+        }
+        else
+        {
+            policy.AllowAnyMethod();
+        }
+
+        var allowedHeaders = corsOptions.GetAllowedHeaders();
+        if (allowedHeaders != null && allowedHeaders.Length > 0)
+        {
+            policy.WithHeaders(allowedHeaders);
+        }
+        else
+        {
+            policy.AllowAnyHeader();
+        }
+
+        if (corsOptions.AllowCredentials)
+        {
+            policy.AllowCredentials();
+        }
+
+        var exposedHeaders = corsOptions.GetExposedHeaders();
+        if (exposedHeaders != null && exposedHeaders.Length > 0)
+        {
+            policy.WithExposedHeaders(exposedHeaders);
+        }
+
+        policy.SetPreflightMaxAge(TimeSpan.FromSeconds(corsOptions.MaxAge));
+    });
+});
+
+// Add DbContext using Options pattern
+builder.Services.AddDbContext<AccountsDbContext>((serviceProvider, options) =>
+{
+    var connectionStringsOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
+    options.UseSqlServer(connectionStringsOptions.DefaultConnection);
+});
 
 // Register repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
@@ -215,6 +280,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Enable CORS
+app.UseCors(CorsOptions.DefaultPolicyName);
 
 app.UseAuthentication();
 app.UseAuthorization();
