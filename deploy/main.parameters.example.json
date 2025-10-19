@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "dev"
+    },
+    "location": {
+      "value": "eastus"
+    },
+    "appServicePlanName": {
+      "value": "your-app-service-plan-name"
+    },
+    "appServicePlanResourceGroup": {
+      "value": "your-app-service-plan-resource-group"
+    },
+    "sqlServerName": {
+      "value": "your-sql-server-name"
+    },
+    "sqlServerResourceGroup": {
+      "value": "your-sql-server-resource-group"
+    },
+    "keyVaultName": {
+      "value": "your-keyvault-name"
+    },
+    "keyVaultResourceGroup": {
+      "value": "your-keyvault-resource-group"
+    },
+    "applicationName": {
+      "value": "tob-accounts-api"
+    },
+    "entraIdTenantId": {
+      "value": "your-entra-tenant-id"
+    },
+    "entraIdClientId": {
+      "value": "your-entra-client-id"
+    },
+    "entraIdAudience": {
+      "value": "your-entra-audience"
+    },
+    "corsAllowedOrigins": {
+      "value": "https://yourdomain.com;https://www.yourdomain.com"
+    },
+    "otlpEndpoint": {
+      "value": "http://localhost:4317"
+    },
+    "enableTracing": {
+      "value": true
+    },
+    "enableMetrics": {
+      "value": true
+    },
+    "enableLogging": {
+      "value": true
+    }
+  }
+}
