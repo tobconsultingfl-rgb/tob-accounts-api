@@ -1,5 +1,9 @@
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TOB.Accounts.Domain.Commands;
+using TOB.Accounts.Domain.Queries;
+using TOB.Accounts.Domain.Responses;
 
 namespace TOB.Accounts.API.Controllers;
 
@@ -9,10 +13,12 @@ namespace TOB.Accounts.API.Controllers;
 public class AccountsController : ControllerBase
 {
     private readonly ILogger<AccountsController> _logger;
+    private readonly IMediator _mediator;
 
-    public AccountsController(ILogger<AccountsController> logger)
+    public AccountsController(ILogger<AccountsController> logger, IMediator mediator)
     {
         _logger = logger;
+        _mediator = mediator;
     }
 
     /// <summary>
@@ -22,16 +28,15 @@ public class AccountsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<IEnumerable<object>> GetAccounts()
+    public async Task<ActionResult<IEnumerable<AccountResponse>>> GetAccountsAsync([FromQuery] Guid tenantId)
     {
-        _logger.LogInformation("Getting all accounts");
+        _logger.LogInformation("Getting all accounts for tenant {TenantId}", tenantId);
 
-        // TODO: Implement actual business logic via Services layer
-        return Ok(new[]
-        {
-            new { Id = 1, Name = "Account 1", Status = "Active" },
-            new { Id = 2, Name = "Account 2", Status = "Active" }
-        });
+        var query = new GetAllAccountsQuery { TenantId = tenantId };
+        var accounts = await _mediator.Send(query);
+
+        var response = accounts.Select(a => AccountResponse.FromDto(a));
+        return Ok(response);
     }
 
     /// <summary>
@@ -43,55 +48,63 @@ public class AccountsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<object> GetAccount(int id)
+    public async Task<ActionResult<AccountResponse>> GetAccountAsync(Guid id)
     {
         _logger.LogInformation("Getting account with ID: {AccountId}", id);
 
-        // TODO: Implement actual business logic via Services layer
-        if (id <= 0)
+        var query = new GetAccountByIdQuery { AccountId = id };
+        var account = await _mediator.Send(query);
+
+        if (account == null)
         {
             return NotFound();
         }
 
-        return Ok(new { Id = id, Name = $"Account {id}", Status = "Active" });
+        return Ok(AccountResponse.FromDto(account));
     }
 
     /// <summary>
     /// Create a new account
     /// </summary>
-    /// <param name="account">Account data</param>
+    /// <param name="command">Account data</param>
     /// <returns>Created account</returns>
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<object> CreateAccount([FromBody] object account)
+    public async Task<ActionResult<AccountResponse>> CreateAccountAsync([FromBody] CreateAccountCommand command)
     {
         _logger.LogInformation("Creating new account");
 
-        // TODO: Implement actual business logic via Services layer
-        var newAccount = new { Id = 3, Name = "New Account", Status = "Active" };
+        var account = await _mediator.Send(command);
+        var response = AccountResponse.FromDto(account);
 
-        return CreatedAtAction(nameof(GetAccount), new { id = 3 }, newAccount);
+        return CreatedAtAction(nameof(GetAccountAsync), new { id = account.AccountId }, response);
     }
 
     /// <summary>
     /// Update an existing account
     /// </summary>
     /// <param name="id">Account ID</param>
-    /// <param name="account">Updated account data</param>
+    /// <param name="command">Updated account data</param>
     /// <returns>No content</returns>
     [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult UpdateAccount(int id, [FromBody] object account)
+    public async Task<IActionResult> UpdateAccountAsync(Guid id, [FromBody] UpdateAccountCommand command)
     {
         _logger.LogInformation("Updating account with ID: {AccountId}", id);
 
-        // TODO: Implement actual business logic via Services layer
-        if (id <= 0)
+        if (id != command.AccountId)
+        {
+            return BadRequest("Account ID mismatch");
+        }
+
+        var account = await _mediator.Send(command);
+
+        if (account == null)
         {
             return NotFound();
         }
@@ -103,17 +116,20 @@ public class AccountsController : ControllerBase
     /// Delete an account
     /// </summary>
     /// <param name="id">Account ID</param>
+    /// <param name="deletedBy">User deleting the account</param>
     /// <returns>No content</returns>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult DeleteAccount(int id)
+    public async Task<IActionResult> DeleteAccountAsync(Guid id, [FromQuery] string deletedBy)
     {
         _logger.LogInformation("Deleting account with ID: {AccountId}", id);
 
-        // TODO: Implement actual business logic via Services layer
-        if (id <= 0)
+        var command = new DeleteAccountCommand { AccountId = id, DeletedBy = deletedBy };
+        var result = await _mediator.Send(command);
+
+        if (!result)
         {
             return NotFound();
         }

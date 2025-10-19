@@ -2,6 +2,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TOB.Accounts.Domain\TOB.Accounts.Domain.csproj" />
+    <ProjectReference Include="..\TOB.Accounts.Infrastructure\TOB.Accounts.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MediatR" Version="13.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
