@@ -1,3 +1,5 @@
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -15,6 +17,19 @@ using TOB.Accounts.Infrastructure.Repositories;
 using TOB.Accounts.Infrastructure.Repositories.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure Azure Key Vault (only in non-development environments)
+if (!builder.Environment.IsDevelopment())
+{
+    var keyVaultUri = builder.Configuration.GetSection("KeyVault:VaultUri").Value;
+
+    if (!string.IsNullOrWhiteSpace(keyVaultUri))
+    {
+        builder.Configuration.AddAzureKeyVault(
+            new Uri(keyVaultUri),
+            new DefaultAzureCredential());
+    }
+}
 
 // Configure Options Pattern with validation
 builder.Services.AddOptions<ConnectionStringsOptions>()
@@ -34,6 +49,11 @@ builder.Services.AddOptions<OpenTelemetryOptions>()
 
 builder.Services.AddOptions<CorsOptions>()
     .Bind(builder.Configuration.GetSection(CorsOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOptions<KeyVaultOptions>()
+    .Bind(builder.Configuration.GetSection(KeyVaultOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
