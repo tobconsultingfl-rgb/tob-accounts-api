@@ -1,124 +1,39 @@
 trigger:
   branches:
     include:
-      - main
+    - main 
   paths:
     exclude:
-      - deploy/main.bicep
+    - 'deploy/main.bicep'
+    - 'deploy/gitflow-infrastructure-pipelines.yml'
+    - 'deploy/githubflow-environment-pipelines.yml'
+    - 'deploy/pipeline-templates/deployInfrastructure.yml'
+    - 'deploy/modules/*'
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
 
 variables:
   - name: environmentType
-    value: prod
-  - name: buildConfiguration
-    value: 'Release'
-  - name: dotnetSdkVersion
-    value: '9.x'
-  - name: projectPath
-    value: 'src/TOB.Accounts.API/TOB.Accounts.API.csproj'
+    ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+      value: pr  
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/feature') }}:
+      value: feature
+    ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
+      value: develop
+    ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release') }}:
+      value: test
+    ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+      value: prod
+
   - group: rm-tob-variables-group-prod
-y
+      
 stages:
-  - stage: Build
-    displayName: 'Build Application'
-    jobs:
-      - job: BuildJob
-        displayName: 'Build .NET Application'
-        steps:
-          - task: UseDotNet@2
-            displayName: 'Use .NET SDK $(dotnetSdkVersion)'
-            inputs:
-              version: $(dotnetSdkVersion)
-              includePreviewVersions: false
-
-          - task: DotNetCoreCLI@2
-            displayName: 'Restore NuGet Packages'
-            inputs:
-              command: 'restore'
-              projects: '**/*.csproj'
-              feedsToUse: 'select'
-
-          - task: DotNetCoreCLI@2
-            displayName: 'Build Solution'
-            inputs:
-              command: 'build'
-              projects: '**/*.csproj'
-              arguments: '--configuration $(buildConfiguration) --no-restore'
-
-          - task: DotNetCoreCLI@2
-            displayName: 'Run Tests'
-            inputs:
-              command: 'test'
-              projects: '**/*Tests.csproj'
-              arguments: '--configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage"'
-              publishTestResults: true
-
-          - task: DotNetCoreCLI@2
-            displayName: 'Publish Application'
-            inputs:
-              command: 'publish'
-              publishWebProjects: false
-              projects: '$(projectPath)'
-              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/app --no-build'
-              zipAfterPublish: true
-              modifyOutputPath: false
-
-          - task: PublishBuildArtifacts@1
-            displayName: 'Publish Artifacts'
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-              ArtifactName: 'drop'
-              publishLocation: 'Container'
-
-  - stage: DeployProd
-    displayName: 'Deploy to Production'
-    dependsOn: Build
-    condition: and(succeeded(), eq('${{ variables.environmentType }}', 'prod'))
-    jobs:
-      - deployment: DeployAppService
-        displayName: 'Deploy to App Service'
-        environment: 'prod'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: DownloadBuildArtifacts@1
-                  displayName: 'Download Artifacts'
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'drop'
-                    downloadPath: '$(System.ArtifactsDirectory)'
-
-                - task: AzureWebApp@1
-                  displayName: 'Deploy to Azure App Service'
-                  inputs:
-                    azureSubscription: $(ARMServiceConnection)
-                    appType: 'webApp'
-                    appName: 'as-accounts-api-prod-eastus2'
-                    package: '$(System.ArtifactsDirectory)/drop/app/*.zip'
-                    deploymentMethod: 'auto'
-                    slotName: 'staging'
-
-                - task: AzureAppServiceManage@0
-                  displayName: 'Swap Staging to Production'
-                  inputs:
-                    azureSubscription: $(ARMServiceConnection)
-                    action: 'Swap Slots'
-                    webAppName: 'as-accounts-api-prod-eastus2'
-                    resourceGroupName: '$(ResourceGroupName)'
-                    sourceSlot: 'staging'
-                    targetSlot: 'production'
-
-                - task: AzureCLI@2
-                  displayName: 'Run Database Migrations'
-                  inputs:
-                    azureSubscription: $(ARMServiceConnection)
-                    scriptType: 'bash'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      echo "Database migrations would run here"
-                      # Add EF Core migrations command here if needed
-                      # dotnet ef database update --connection "$(connectionString)"
+- stage: BuildAndDeploy
+  displayName: Builds and deploys app
+  jobs:
+    - template : pipeline-templates/buildAndDeploy.yml
+      parameters:
+        armServiceConnection: $(ARMServiceConnection)
+        resourceGroupName: $(ResourceGroupName)
+ 

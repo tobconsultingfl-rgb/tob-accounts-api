@@ -1,73 +1,55 @@
 trigger:
   branches:
     include:
-      - main
+    - main
   paths:
     include:
-      - deploy/main.bicep
-
-pool:
-  vmImage: 'ubuntu-latest'
+    - 'deploy/main.bicep'
 
 variables:
   - name: environmentType
     value: prod
 
   - group: rm-tob-variables-group-prod
-
+  
+pool:
+  vmImage: ubuntu-latest
 stages:
-  - stage: Validate
-    displayName: 'Validate Bicep Template'
-    jobs:
-      - job: ValidateBicep
-        displayName: 'Validate Bicep'
-        steps:
-          - task: AzureCLI@2
-            displayName: 'Validate Bicep Template'
-            inputs:
-              azureSubscription: '$(ARMServiceConnection)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                az bicep build --file $(Build.SourcesDirectory)/deploy/main.bicep
-                echo "Bicep validation successful"
+- stage: AssignVariables
+  jobs:
+    - job: AssignApplicationName
+      steps:
+      - task: PowerShell@2
+        name: variables
+        displayName: 'Get Application Name'  
+        inputs:  
+          targetType: 'inline'
+          script:  
+            $startIndex = "$(Build.Repository.Name)".IndexOf(".");
+            $applicationName = "accounts-api";
 
-  - stage: Deploy
-    displayName: 'Deploy Infrastructure'
-    dependsOn: Validate
-    condition: succeeded()
-    jobs:
-      - deployment: DeployInfrastructure
-        displayName: 'Deploy to Azure'
-        environment: ${{ variables.environmentType }}
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
+            Write-Host "##vso[task.setvariable variable=applicationName;isOutput=true]$applicationName";  
 
-                - task: AzureResourceManagerTemplateDeployment@3
-                  displayName: 'Deploy Bicep Template'
-                  inputs:
-                    deploymentScope: 'Resource Group'
-                    azureResourceManagerConnection: 'Portfolio-Dev'
-                    subscriptionId: 'a8f28993-9763-4884-9903-6f10483f8bc4'
-                    action: 'Create Or Update Resource Group'
-                    resourceGroupName: 'rg-tobconsulting'
-                    location: 'East US 2'
-                    templateLocation: 'Linked artifact'
-                    csmFile: '$(Build.SourcesDirectory)/deploy/main.bicep'
-                    overrideParameters: '-environmentName ''${{ variables.environmentType }}'' -Location ''$(Location)'' -appServicePlanName ''$(AppServicePlanName)'''' -sqlServerName ''$(SqlServerName) -keyVaultName ''$(KeyVaultName)'' -applicationName "tob-accounts-api" -entraIdTenantId "$(AzureADTenantId)" -entraIdClientId "$(AzureADClientId)" -entraIdAudience "$(AzureADClientId)" -otlpEndpoint "$(otlpEndpoint)" -enableTracing true -enableMetrics true -enableLogging true'
-                    deploymentMode: 'Incremental'
-                    deploymentOutputs: 'deploymentOutputs'
-
-                - task: PowerShell@2
-                  displayName: 'Parse Deployment Outputs'
-                  inputs:
-                    targetType: 'inline'
-                    script: |
-                      $outputs = ConvertFrom-Json '$(deploymentOutputs)'
-                      foreach ($output in $outputs.PSObject.Properties) {
-                        Write-Host "##vso[task.setvariable variable=$($output.Name);isOutput=true]$($output.Value.value)"
-                        Write-Host "$($output.Name): $($output.Value.value)"
-                      }
+- stage: DeployEnvironment
+  displayName: Deploys the environment.  
+  dependsOn: AssignVariables
+  variables:
+    applicationName: $[stageDependencies.AssignVariables.AssignApplicationName.outputs['variables.applicationName']]    
+  jobs:
+  - template: pipeline-templates/deployInfrastructure.yml
+    parameters:
+      environmentType: ${{ variables.environmentType }}
+      armServiceConnection: '$(ARMServiceConnection)'
+      resourceGroupName: '$(ResourceGroupName)'
+      keyVaultName: '$(KeyVaultName)'
+      azureADInstance: '$(AzureADInstance)'
+      azureADDomain: '$(AzureADDomain)'
+      azureADTenantId: '$(AzureADTenantId)'
+      azureADClientId: '$(AzureADClientId)'
+      azureADClientSecret: '$(AzureADClientSecret)'       
+      azureADExtensionId: '$(AzureADExtensionId)'   
+      sqlServerName: '$(SqlServerName)'
+      sqlAdminUsername: '$(SqlAdminUsername)'
+      sqlAdminPassword: '$(SqlAdminPassword)'
+      appServicePlanName: '$(AppServicePlanName)'
+      
