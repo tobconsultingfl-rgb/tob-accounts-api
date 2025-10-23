@@ -34,9 +34,6 @@ param entraIdClientId string
 @description('The Entra ID Audience (API Client ID)')
 param entraIdAudience string
 
-@description('CORS allowed origins (semicolon-delimited)')
-param corsAllowedOrigins string
-
 @description('OpenTelemetry OTLP Endpoint')
 param otlpEndpoint string = 'http://localhost:4317'
 

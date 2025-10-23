@@ -50,7 +50,7 @@ stages:
                   displayName: 'Deploy Bicep Template'
                   inputs:
                     deploymentScope: 'Resource Group'
-                    azureResourceManagerConnection: $(ARMServiceConnection)
+                    azureResourceManagerConnection: '$(ARMServiceConnection)'
                     subscriptionId: '$(SubscriptionId)'
                     action: 'Create Or Update Resource Group'
                     resourceGroupName: $(ResourceGroupName)
