@@ -108,17 +108,6 @@ module appService './modules/appService.bicep' = {
   }
 }
 
-// Assign Key Vault Secrets User role to App Service managed identity
-module keyVaultRoleAssignment './modules/keyVaultRoleAssignment.bicep' = {
-  name: 'keyVaultRoleAssignmentDeploy'
-  scope: resourceGroup(resourceGroupName)
-  params: {
-    keyVaultName: keyVaultName
-    principalId: appService.outputs.appServicePrincipalId
-    roleAssignmentName: guid(subscription().subscriptionId, resourceGroupName, keyVaultName, appServiceName, 'Key Vault Secrets User')
-  }
-}
-
 module connectionStringSecret './modules/keyVaultSecret.bicep' = {
   name: 'databaseConnectionStringSecretDeploy'
   params: {
