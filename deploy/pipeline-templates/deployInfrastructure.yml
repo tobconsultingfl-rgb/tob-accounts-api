@@ -27,9 +27,7 @@ parameters:
 - name: sqlAdminPassword 
   type: string
 - name: appServicePlanName 
-  type: string
-- name: appServicePlanName 
-  type: string
+  type: string 
 
 jobs:
 - job: ValidateDeployment
