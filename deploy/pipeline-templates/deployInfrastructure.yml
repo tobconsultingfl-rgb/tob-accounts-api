@@ -99,12 +99,12 @@ jobs:
                                 azureADTenantId=${{parameters.azureADTenantId}} \
                                 azureADClientId=${{parameters.azureADClientId}} \
                                 azureADExtensionId=${{parameters.azureADExtensionId}} \
-                                azureADClientSecret=${{parameters.azureADClientSecret}}) \
+                                azureADClientSecret=${{parameters.azureADClientSecret}} \
                                 sqlServerName='${{parameters.sqlServerName}}' \
                                 sqlAdminUsername='${{parameters.sqlAdminUsername}}' \
                                 sqlAdminPassword='${{parameters.sqlAdminPassword}}' \
                                 appServicePlanName='${{parameters.appServicePlanName}}' \
-                                resourceGroupName='${{parameters.resourceGroupName}}'
+                                resourceGroupName='${{parameters.resourceGroupName}}')
                                 
                 appServiceAppName=$(echo $deploymentOutput | jq -r '.properties.outputs.appServiceAppName.value')
                 appServiceAppHostName=$(echo $deploymentOutput | jq -r '.properties.outputs.appServiceAppHostName.value')
