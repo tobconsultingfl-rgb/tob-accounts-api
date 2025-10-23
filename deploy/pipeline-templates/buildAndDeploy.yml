@@ -76,3 +76,20 @@ jobs:
       appName: '$(appServiceName)' #App Service's unique name
       package: $(Build.ArtifactStagingDirectory)/**/*.zip
       deploymentMethod: 'zipDeploy'
+
+  # Install EF Core Tools
+  - task: DotNetCoreCLI@2
+    displayName: 'Install EF Core Tools'
+    inputs:
+      command: 'custom'
+      custom: 'tool'
+      arguments: 'install --global dotnet-ef --version 9.0.10'
+
+  # Run EF Core Migrations
+  - task: DotNetCoreCLI@2
+    displayName: 'Run EF Core Migrations'
+    inputs:
+      command: 'custom'
+      custom: 'ef'
+      arguments: 'database update --project src/TOB.Accounts.Infrastructure/TOB.Accounts.Infrastructure.csproj --startup-project src/TOB.Accounts.API/TOB.Accounts.API.csproj --connection "$(AccountsConnectionString)"'
+      workingDirectory: '$(System.DefaultWorkingDirectory)'
