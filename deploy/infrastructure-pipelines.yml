@@ -57,11 +57,11 @@ stages:
                     templateLocation: 'Linked artifact'
                     csmFile: '$(Build.SourcesDirectory)/deploy/main.bicep'
                     overrideParameters: >
-                      -environmentName "${{ variables.environmentType }}"
-                      -Location "$(Location)"
-                      -appServicePlanName "$(AppServicePlanName)"
-                      -sqlServerName "$(SqlServerName)"
-                      -keyVaultName "$(KeyVaultName)"
+                      -environmentName '${{ variables.environmentType }}'
+                      -Location '$(Location)'
+                      -appServicePlanName '$(AppServicePlanName)''
+                      -sqlServerName '$(SqlServerName)
+                      -keyVaultName '$(KeyVaultName)'
                       -applicationName "tob-accounts-api"
                       -entraIdTenantId "$(AzureADTenantId)"
                       -entraIdClientId "$(AzureADClientId)"
