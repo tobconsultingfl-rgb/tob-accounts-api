@@ -12,6 +12,6 @@ public class ConnectionStringsOptions
     /// <summary>
     /// Default database connection string
     /// </summary>
-    [Required(ErrorMessage = "DefaultConnection is required")]
-    public required string DefaultConnection { get; set; }
+    [Required(ErrorMessage = "AccountDbConnection is required")]
+    public required string AccountDbConnection { get; set; }
 }

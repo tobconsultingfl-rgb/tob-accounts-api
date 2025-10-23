@@ -222,7 +222,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AccountsDbContext>((serviceProvider, options) =>
 {
     var connectionStringsOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
-    options.UseSqlServer(connectionStringsOptions.DefaultConnection);
+    options.UseSqlServer(connectionStringsOptions.AccountDbConnection);
 });
 
 // Register repositories

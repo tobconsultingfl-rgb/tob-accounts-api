@@ -9,26 +9,17 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-parameters:
-  - name: environment
-    displayName: 'Environment'
-    type: string
-    default: 'dev'
-    values:
-      - dev
-      - test
-      - prod
-
 variables:
-  - name: azureSubscription
-    value: 'YOUR_AZURE_SERVICE_CONNECTION_NAME'
+  - name: environmentType
+    value: prod
   - name: buildConfiguration
     value: 'Release'
   - name: dotnetSdkVersion
     value: '9.x'
   - name: projectPath
     value: 'src/TOB.Accounts.API/TOB.Accounts.API.csproj'
-
+  - group: rm-tob-variables-group-prod
+y
 stages:
   - stage: Build
     displayName: 'Build Application'
@@ -81,90 +72,10 @@ stages:
               ArtifactName: 'drop'
               publishLocation: 'Container'
 
-  - stage: DeployDev
-    displayName: 'Deploy to Dev'
-    dependsOn: Build
-    condition: and(succeeded(), eq('${{ parameters.environment }}', 'dev'))
-    jobs:
-      - deployment: DeployAppService
-        displayName: 'Deploy to App Service'
-        environment: 'dev'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: DownloadBuildArtifacts@1
-                  displayName: 'Download Artifacts'
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'drop'
-                    downloadPath: '$(System.ArtifactsDirectory)'
-
-                - task: AzureWebApp@1
-                  displayName: 'Deploy to Azure App Service'
-                  inputs:
-                    azureSubscription: $(azureSubscription)
-                    appType: 'webApp'
-                    appName: '$(appServiceName)'
-                    package: '$(System.ArtifactsDirectory)/drop/app/*.zip'
-                    deploymentMethod: 'auto'
-
-                - task: AzureCLI@2
-                  displayName: 'Run Database Migrations'
-                  inputs:
-                    azureSubscription: $(azureSubscription)
-                    scriptType: 'bash'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      echo "Database migrations would run here"
-                      # Add EF Core migrations command here if needed
-                      # dotnet ef database update --connection "$(connectionString)"
-
-  - stage: DeployTest
-    displayName: 'Deploy to Test'
-    dependsOn: Build
-    condition: and(succeeded(), eq('${{ parameters.environment }}', 'test'))
-    jobs:
-      - deployment: DeployAppService
-        displayName: 'Deploy to App Service'
-        environment: 'test'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: DownloadBuildArtifacts@1
-                  displayName: 'Download Artifacts'
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'drop'
-                    downloadPath: '$(System.ArtifactsDirectory)'
-
-                - task: AzureWebApp@1
-                  displayName: 'Deploy to Azure App Service'
-                  inputs:
-                    azureSubscription: $(azureSubscription)
-                    appType: 'webApp'
-                    appName: '$(appServiceName)'
-                    package: '$(System.ArtifactsDirectory)/drop/app/*.zip'
-                    deploymentMethod: 'auto'
-
-                - task: AzureCLI@2
-                  displayName: 'Run Database Migrations'
-                  inputs:
-                    azureSubscription: $(azureSubscription)
-                    scriptType: 'bash'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      echo "Database migrations would run here"
-                      # Add EF Core migrations command here if needed
-                      # dotnet ef database update --connection "$(connectionString)"
-
   - stage: DeployProd
     displayName: 'Deploy to Production'
     dependsOn: Build
-    condition: and(succeeded(), eq('${{ parameters.environment }}', 'prod'))
+    condition: and(succeeded(), eq('${{ variables.environmentType }}', 'prod'))
     jobs:
       - deployment: DeployAppService
         displayName: 'Deploy to App Service'
@@ -184,9 +95,9 @@ stages:
                 - task: AzureWebApp@1
                   displayName: 'Deploy to Azure App Service'
                   inputs:
-                    azureSubscription: $(azureSubscription)
+                    azureSubscription: $(ARMServiceConnection)
                     appType: 'webApp'
-                    appName: '$(appServiceName)'
+                    appName: 'as-accounts-api-prod-eastus2'
                     package: '$(System.ArtifactsDirectory)/drop/app/*.zip'
                     deploymentMethod: 'auto'
                     slotName: 'staging'
@@ -194,17 +105,17 @@ stages:
                 - task: AzureAppServiceManage@0
                   displayName: 'Swap Staging to Production'
                   inputs:
-                    azureSubscription: $(azureSubscription)
+                    azureSubscription: $(ARMServiceConnection)
                     action: 'Swap Slots'
-                    webAppName: '$(appServiceName)'
-                    resourceGroupName: '$(resourceGroupName)'
+                    webAppName: 'as-accounts-api-prod-eastus2'
+                    resourceGroupName: '$(ResourceGroupName)'
                     sourceSlot: 'staging'
                     targetSlot: 'production'
 
                 - task: AzureCLI@2
                   displayName: 'Run Database Migrations'
                   inputs:
-                    azureSubscription: $(azureSubscription)
+                    azureSubscription: $(ARMServiceConnection)
                     scriptType: 'bash'
                     scriptLocation: 'inlineScript'
                     inlineScript: |

@@ -168,10 +168,7 @@ resource appService 'Microsoft.Web/sites@2023-12-01' = {
           name: 'AzureAd__Audience'
           value: entraIdAudience
         }
-        {
-          name: 'Cors__AllowedOrigins'
-          value: corsAllowedOrigins
-        }
+
         {
           name: 'Cors__AllowCredentials'
           value: 'true'
@@ -223,7 +220,7 @@ resource appService 'Microsoft.Web/sites@2023-12-01' = {
       ]
       connectionStrings: [
         {
-          name: 'DefaultConnection'
+          name: 'AccountDbConnection'
           connectionString: 'Server=tcp:${sqlServer.properties.fullyQualifiedDomainName},1433;Initial Catalog=${sqlDatabaseName};Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;'
           type: 'SQLAzure'
         }

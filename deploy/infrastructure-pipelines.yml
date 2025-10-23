@@ -9,23 +9,11 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-parameters:
-  - name: environment
-    displayName: 'Environment'
-    type: string
-    default: 'dev'
-    values:
-      - dev
-      - test
-      - prod
-
 variables:
-  - name: azureSubscription
-    value: 'YOUR_AZURE_SERVICE_CONNECTION_NAME'
-  - name: resourceGroupName
-    value: 'rg-tob-accounts-${{ parameters.environment }}'
-  - name: location
-    value: 'East US'
+  - name: environmentType
+    value: prod
+
+  - group: rm-tob-variables-group-prod
 
 stages:
   - stage: Validate
@@ -37,7 +25,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Validate Bicep Template'
             inputs:
-              azureSubscription: $(azureSubscription)
+              azureSubscription: '$(ARMServiceConnection)'
               scriptType: 'bash'
               scriptLocation: 'inlineScript'
               inlineScript: |
@@ -51,46 +39,32 @@ stages:
     jobs:
       - deployment: DeployInfrastructure
         displayName: 'Deploy to Azure'
-        environment: ${{ parameters.environment }}
+        environment: ${{ variables.environmentType }}
         strategy:
           runOnce:
             deploy:
               steps:
                 - checkout: self
 
-                - task: AzureCLI@2
-                  displayName: 'Create Resource Group'
-                  inputs:
-                    azureSubscription: $(azureSubscription)
-                    scriptType: 'bash'
-                    scriptLocation: 'inlineScript'
-                    inlineScript: |
-                      az group create \
-                        --name $(resourceGroupName) \
-                        --location "$(location)"
-
                 - task: AzureResourceManagerTemplateDeployment@3
                   displayName: 'Deploy Bicep Template'
                   inputs:
                     deploymentScope: 'Resource Group'
-                    azureResourceManagerConnection: $(azureSubscription)
+                    azureResourceManagerConnection: $(ARMServiceConnection)
                     subscriptionId: '$(subscriptionId)'
                     action: 'Create Or Update Resource Group'
-                    resourceGroupName: $(resourceGroupName)
-                    location: $(location)
+                    resourceGroupName: $(ResourceGroupName)
                     templateLocation: 'Linked artifact'
                     csmFile: '$(Build.SourcesDirectory)/deploy/main.bicep'
                     overrideParameters: >
-                      -environmentName "${{ parameters.environment }}"
-                      -location "$(location)"
-                      -appServicePlanName "$(appServicePlanName)"
-                      -sqlServerName "$(sqlServerName)"
-                      -keyVaultName "$(keyVaultName)"
+                      -environmentName "${{ variables.environmentType }}"
+                      -appServicePlanName "$(AppServicePlanName)"
+                      -sqlServerName "$(SqlServerName)"
+                      -keyVaultName "$(KeyVaultName)"
                       -applicationName "tob-accounts-api"
-                      -entraIdTenantId "$(entraIdTenantId)"
-                      -entraIdClientId "$(entraIdClientId)"
-                      -entraIdAudience "$(entraIdAudience)"
-                      -corsAllowedOrigins "$(corsAllowedOrigins)"
+                      -entraIdTenantId "$(AzureADTenantId)"
+                      -entraIdClientId "$(AzureADClientId)"
+                      -entraIdAudience "$(AzureADClientId)"
                       -otlpEndpoint "$(otlpEndpoint)"
                       -enableTracing true
                       -enableMetrics true
