@@ -58,7 +58,7 @@ stages:
                     csmFile: '$(Build.SourcesDirectory)/deploy/main.bicep'
                     overrideParameters: >
                       -environmentName "${{ variables.environmentType }}"
-                      -location "eastus2"
+                      -location "$(Location)"
                       -appServicePlanName "$(AppServicePlanName)"
                       -sqlServerName "$(SqlServerName)"
                       -keyVaultName "$(KeyVaultName)"
