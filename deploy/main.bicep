@@ -35,7 +35,7 @@ param sqlAdminPassword string
 @description('App Service Plan Name')
 param appServicePlanName string
 @description('Resource Group')
-param resourceGroup string
+param resourceGroupName string
 
 @description('Select the type of environment you want to provision. Case Sensitive!')
 @allowed([
@@ -77,14 +77,14 @@ module database './modules/sqlDatabase.bicep' = {
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' existing = {
   name: appServicePlanName
-  scope: resourceGroup(resourceGroup)
+  scope: resourceGroup(resourceGroupName)
 }
 
 module appService './modules/appService.bicep' = {
   name: 'appServiceDeploy'
   params: {
     appServiceName: appServiceName
-    serverFarmId: appServicePlan.outputs.serverFarmId
+    serverFarmId: appServicePlan.id
     location: location
     appSettings: appConfigSettings
     tags: tags
@@ -94,7 +94,7 @@ module appService './modules/appService.bicep' = {
 // Reference to existing Key Vault
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
   name: keyVaultName
-  scope: resourceGroup(resourceGroup)
+  scope: resourceGroup(resourceGroupName)
 }
 // Assign Key Vault Secrets User role to App Service managed identity
 resource keyVaultRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
