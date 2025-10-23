@@ -50,26 +50,14 @@ stages:
                   displayName: 'Deploy Bicep Template'
                   inputs:
                     deploymentScope: 'Resource Group'
-                    azureResourceManagerConnection: '$(ARMServiceConnection)'
-                    subscriptionId: '$(SubscriptionId)'
+                    azureResourceManagerConnection: 'Portfolio-Dev'
+                    subscriptionId: 'a8f28993-9763-4884-9903-6f10483f8bc4'
                     action: 'Create Or Update Resource Group'
-                    resourceGroupName: $(ResourceGroupName)
+                    resourceGroupName: 'rg-tobconsulting'
+                    location: 'East US 2'
                     templateLocation: 'Linked artifact'
                     csmFile: '$(Build.SourcesDirectory)/deploy/main.bicep'
-                    overrideParameters: >
-                      -environmentName '${{ variables.environmentType }}'
-                      -Location '$(Location)'
-                      -appServicePlanName '$(AppServicePlanName)''
-                      -sqlServerName '$(SqlServerName)
-                      -keyVaultName '$(KeyVaultName)'
-                      -applicationName "tob-accounts-api"
-                      -entraIdTenantId "$(AzureADTenantId)"
-                      -entraIdClientId "$(AzureADClientId)"
-                      -entraIdAudience "$(AzureADClientId)"
-                      -otlpEndpoint "$(otlpEndpoint)"
-                      -enableTracing true
-                      -enableMetrics true
-                      -enableLogging true
+                    overrideParameters: '-environmentName ''${{ variables.environmentType }}'' -Location ''$(Location)'' -appServicePlanName ''$(AppServicePlanName)'''' -sqlServerName ''$(SqlServerName) -keyVaultName ''$(KeyVaultName)'' -applicationName "tob-accounts-api" -entraIdTenantId "$(AzureADTenantId)" -entraIdClientId "$(AzureADClientId)" -entraIdAudience "$(AzureADClientId)" -otlpEndpoint "$(otlpEndpoint)" -enableTracing true -enableMetrics true -enableLogging true'
                     deploymentMode: 'Incremental'
                     deploymentOutputs: 'deploymentOutputs'
 
