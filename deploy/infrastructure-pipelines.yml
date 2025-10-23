@@ -51,13 +51,14 @@ stages:
                   inputs:
                     deploymentScope: 'Resource Group'
                     azureResourceManagerConnection: $(ARMServiceConnection)
-                    subscriptionId: '$(subscriptionId)'
+                    subscriptionId: '$(SubscriptionId)'
                     action: 'Create Or Update Resource Group'
                     resourceGroupName: $(ResourceGroupName)
                     templateLocation: 'Linked artifact'
                     csmFile: '$(Build.SourcesDirectory)/deploy/main.bicep'
                     overrideParameters: >
                       -environmentName "${{ variables.environmentType }}"
+                      -location "eastus2"
                       -appServicePlanName "$(AppServicePlanName)"
                       -sqlServerName "$(SqlServerName)"
                       -keyVaultName "$(KeyVaultName)"
