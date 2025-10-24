@@ -15,9 +15,11 @@ using TOB.Accounts.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Skip Key Vault during EF Core migrations or when explicitly disabled
+var skipKeyVault = Environment.GetEnvironmentVariable("SKIP_KEYVAULT") == "true";
 var keyVaultUri = builder.Configuration.GetSection("KeyVault:VaultUri").Value;
 
-if (!string.IsNullOrWhiteSpace(keyVaultUri))
+if (!skipKeyVault && !string.IsNullOrWhiteSpace(keyVaultUri))
 {
     builder.Configuration.AddAzureKeyVault(
         new Uri(keyVaultUri),

@@ -93,3 +93,5 @@ jobs:
       custom: 'ef'
       arguments: 'database update --project src/TOB.Accounts.Infrastructure/TOB.Accounts.Infrastructure.csproj --startup-project src/TOB.Accounts.API/TOB.Accounts.API.csproj --connection "$(AccountsConnectionString)"'
       workingDirectory: '$(System.DefaultWorkingDirectory)'
+    env:
+      SKIP_KEYVAULT: 'true'
