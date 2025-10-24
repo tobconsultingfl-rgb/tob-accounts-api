@@ -51,6 +51,7 @@ param environmentType string
 var sqlDatabaseName = 'AccountsDb'
 var appServiceName = 'as-${applicationName}-${environmentType}-${location}'
 var appInsightsName = 'ai-${applicationName}-${environmentType}-${location}'
+var storageAccountName = 'st${replace(applicationName, '-', '')}${environmentType}${substring(uniqueString(resourceGroup().id), 0, 4)}'
 
 var tags = {
   'Owner': 'TOB Consulting'
@@ -67,6 +68,18 @@ var appConfigSettings = [
   {
     name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
     value: '~3'
+  }
+  {
+    name: 'AzureStorage__ConnectionString'
+    value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.outputs.storageAccountName};AccountKey=${storageAccount.outputs.storageAccountKey};EndpointSuffix=core.windows.net'
+  }
+  {
+    name: 'AzureStorage__BlobEndpoint'
+    value: storageAccount.outputs.blobEndpoint
+  }
+  {
+    name: 'AzureStorage__AccountName'
+    value: storageAccount.outputs.storageAccountName
   }
 ]
 
@@ -92,6 +105,16 @@ module appInsights './modules/appInsights.bicep' = {
   }
 }
 
+module storageAccount './modules/storageAccount.bicep' = {
+  name: 'storageAccountDeploy'
+  params: {
+    storageAccountName: storageAccountName
+    location: location
+    tags: tags
+    environmentType: environmentType
+  }
+}
+
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' existing = {
   name: appServicePlanName
   scope: resourceGroup(resourceGroupName)
@@ -108,12 +131,31 @@ module appService './modules/appService.bicep' = {
   }
 }
 
+// Assign Storage Blob Data Contributor role to App Service managed identity
+module storageRoleAssignment './modules/storageRoleAssignment.bicep' = {
+  name: 'storageRoleAssignmentDeploy'
+  params: {
+    storageAccountName: storageAccount.outputs.storageAccountName
+    principalId: appService.outputs.appServicePrincipalId
+    roleAssignmentName: guid(subscription().subscriptionId, storageAccount.outputs.storageAccountId, appServiceName, 'Storage Blob Data Contributor')
+  }
+}
+
 module connectionStringSecret './modules/keyVaultSecret.bicep' = {
   name: 'databaseConnectionStringSecretDeploy'
   params: {
     keyVaultName: keyVaultName
     secretName: 'ConnectionStrings--AccountsDBContext'
     secretValue: database.outputs.connectionString
+  }
+}
+
+module storageConnectionStringSecret './modules/keyVaultSecret.bicep' = {
+  name: 'storageConnectionStringSecretDeploy'
+  params: {
+    keyVaultName: keyVaultName
+    secretName: 'AzureStorage--ConnectionString'
+    secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.outputs.storageAccountName};AccountKey=${storageAccount.outputs.storageAccountKey};EndpointSuffix=core.windows.net'
   }
 }
 
