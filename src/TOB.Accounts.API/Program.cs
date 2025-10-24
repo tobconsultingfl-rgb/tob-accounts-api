@@ -15,17 +15,13 @@ using TOB.Accounts.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Azure Key Vault (only in non-development environments)
-if (!builder.Environment.IsDevelopment())
-{
-    var keyVaultUri = builder.Configuration.GetSection("KeyVault:VaultUri").Value;
+var keyVaultUri = builder.Configuration.GetSection("KeyVault:VaultUri").Value;
 
-    if (!string.IsNullOrWhiteSpace(keyVaultUri))
-    {
-        builder.Configuration.AddAzureKeyVault(
-            new Uri(keyVaultUri),
-            new DefaultAzureCredential());
-    }
+if (!string.IsNullOrWhiteSpace(keyVaultUri))
+{
+    builder.Configuration.AddAzureKeyVault(
+        new Uri(keyVaultUri),
+        new DefaultAzureCredential());
 }
 
 // Configure Options Pattern with validation
@@ -121,7 +117,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<AccountsDbContext>((serviceProvider, options) =>
 {
     var connectionStringsOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStringsOptions>>().Value;
-    options.UseSqlServer(connectionStringsOptions.AccountDbConnection);
+    options.UseSqlServer(connectionStringsOptions.AccountsDBContext);
 });
 
 // Register repositories
