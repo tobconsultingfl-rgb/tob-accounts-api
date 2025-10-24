@@ -129,7 +129,7 @@ module appService './modules/appService.bicep' = {
 //   }
 // }
 
-module storageAccountSecret './modules/keyVaultSecret.bicep' = {
+module storageAccountNameSecret './modules/keyVaultSecret.bicep' = {
   name: 'storageAccountNameSecretDeploy'
   params: {
     keyVaultName: keyVaultName
@@ -162,15 +162,6 @@ module connectionStringSecret './modules/keyVaultSecret.bicep' = {
     keyVaultName: keyVaultName
     secretName: 'ConnectionStrings--AccountsDBContext'
     secretValue: database.outputs.connectionString
-  }
-}
-
-module storageConnectionStringSecret './modules/keyVaultSecret.bicep' = {
-  name: 'storageConnectionStringSecretDeploy'
-  params: {
-    keyVaultName: keyVaultName
-    secretName: 'AzureStorage--ConnectionString'
-    secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.outputs.storageAccountName};AccountKey=${storageAccount.outputs.storageAccountKey};EndpointSuffix=core.windows.net'
   }
 }
 
