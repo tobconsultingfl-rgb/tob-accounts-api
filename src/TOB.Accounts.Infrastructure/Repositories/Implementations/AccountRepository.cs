@@ -58,15 +58,41 @@ public class AccountRepository : IAccountRepository
             AccountId = Guid.NewGuid(),
             TenantId = createAccountRequest.TenantId,
             Name = createAccountRequest.Name,
-            AddressLine1 = createAccountRequest.AddressLine1,
-            AddressLine2 = createAccountRequest.AddressLine2,
-            City = createAccountRequest.City,
-            State = createAccountRequest.State,
-            PostalCode = createAccountRequest.PostalCode,
-            Country = createAccountRequest.Country,
-            PrimaryContactName = createAccountRequest.PrimaryContactName,
-            PrimaryContactEmail = createAccountRequest.PrimaryContactEmail,
-            PrimaryContactPhone = createAccountRequest.PrimaryContactPhone,
+
+            // CRM Business Information
+            AccountType = createAccountRequest.AccountType,
+            AccountStatus = createAccountRequest.AccountStatus,
+            Industry = createAccountRequest.Industry,
+            AnnualRevenue = createAccountRequest.AnnualRevenue,
+            NumberOfEmployees = createAccountRequest.NumberOfEmployees,
+            Website = createAccountRequest.Website,
+            Description = createAccountRequest.Description,
+            AccountNumber = createAccountRequest.AccountNumber,
+            ParentAccountId = createAccountRequest.ParentAccountId,
+            OwnerId = createAccountRequest.OwnerId,
+            Rating = createAccountRequest.Rating,
+
+            // Billing Address Information
+            BillingAddressLine1 = createAccountRequest.BillingAddressLine1,
+            BillingAddressLine2 = createAccountRequest.BillingAddressLine2,
+            BillingCity = createAccountRequest.BillingCity,
+            BillingState = createAccountRequest.BillingState,
+            BillingPostalCode = createAccountRequest.BillingPostalCode,
+            BillingCountry = createAccountRequest.BillingCountry,
+
+            // Shipping Address Information
+            ShippingAddressLine1 = createAccountRequest.ShippingAddressLine1,
+            ShippingAddressLine2 = createAccountRequest.ShippingAddressLine2,
+            ShippingCity = createAccountRequest.ShippingCity,
+            ShippingState = createAccountRequest.ShippingState,
+            ShippingPostalCode = createAccountRequest.ShippingPostalCode,
+            ShippingCountry = createAccountRequest.ShippingCountry,
+
+            // Contact Information
+            Phone = createAccountRequest.Phone,
+            Fax = createAccountRequest.Fax,
+            Email = createAccountRequest.Email,
+
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
@@ -89,15 +115,41 @@ public class AccountRepository : IAccountRepository
         }
 
         account.Name = updateAccountRequest.Name;
-        account.AddressLine1 = updateAccountRequest.AddressLine1;
-        account.AddressLine2 = updateAccountRequest.AddressLine2;
-        account.City = updateAccountRequest.City;
-        account.State = updateAccountRequest.State;
-        account.PostalCode = updateAccountRequest.PostalCode;
-        account.Country = updateAccountRequest.Country;
-        account.PrimaryContactName = updateAccountRequest.PrimaryContactName;
-        account.PrimaryContactEmail = updateAccountRequest.PrimaryContactEmail;
-        account.PrimaryContactPhone = updateAccountRequest.PrimaryContactPhone;
+
+        // CRM Business Information
+        account.AccountType = updateAccountRequest.AccountType;
+        account.AccountStatus = updateAccountRequest.AccountStatus;
+        account.Industry = updateAccountRequest.Industry;
+        account.AnnualRevenue = updateAccountRequest.AnnualRevenue;
+        account.NumberOfEmployees = updateAccountRequest.NumberOfEmployees;
+        account.Website = updateAccountRequest.Website;
+        account.Description = updateAccountRequest.Description;
+        account.AccountNumber = updateAccountRequest.AccountNumber;
+        account.ParentAccountId = updateAccountRequest.ParentAccountId;
+        account.OwnerId = updateAccountRequest.OwnerId;
+        account.Rating = updateAccountRequest.Rating;
+
+        // Billing Address Information
+        account.BillingAddressLine1 = updateAccountRequest.BillingAddressLine1;
+        account.BillingAddressLine2 = updateAccountRequest.BillingAddressLine2;
+        account.BillingCity = updateAccountRequest.BillingCity;
+        account.BillingState = updateAccountRequest.BillingState;
+        account.BillingPostalCode = updateAccountRequest.BillingPostalCode;
+        account.BillingCountry = updateAccountRequest.BillingCountry;
+
+        // Shipping Address Information
+        account.ShippingAddressLine1 = updateAccountRequest.ShippingAddressLine1;
+        account.ShippingAddressLine2 = updateAccountRequest.ShippingAddressLine2;
+        account.ShippingCity = updateAccountRequest.ShippingCity;
+        account.ShippingState = updateAccountRequest.ShippingState;
+        account.ShippingPostalCode = updateAccountRequest.ShippingPostalCode;
+        account.ShippingCountry = updateAccountRequest.ShippingCountry;
+
+        // Contact Information
+        account.Phone = updateAccountRequest.Phone;
+        account.Fax = updateAccountRequest.Fax;
+        account.Email = updateAccountRequest.Email;
+
         account.IsActive = updateAccountRequest.IsActive;
         account.UpdatedAt = DateTime.UtcNow;
         account.UpdatedBy = updatedBy;

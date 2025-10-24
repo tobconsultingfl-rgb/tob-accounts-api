@@ -21,15 +21,40 @@ public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand,
         {
             TenantId = request.TenantId,
             Name = request.Name,
-            AddressLine1 = request.AddressLine1,
-            AddressLine2 = request.AddressLine2,
-            City = request.City,
-            State = request.State,
-            PostalCode = request.PostalCode,
-            Country = request.Country,
-            PrimaryContactName = request.PrimaryContactName,
-            PrimaryContactEmail = request.PrimaryContactEmail,
-            PrimaryContactPhone = request.PrimaryContactPhone
+
+            // CRM Business Information
+            AccountType = request.AccountType,
+            AccountStatus = request.AccountStatus,
+            Industry = request.Industry,
+            AnnualRevenue = request.AnnualRevenue,
+            NumberOfEmployees = request.NumberOfEmployees,
+            Website = request.Website,
+            Description = request.Description,
+            AccountNumber = request.AccountNumber,
+            ParentAccountId = request.ParentAccountId,
+            OwnerId = request.OwnerId,
+            Rating = request.Rating,
+
+            // Billing Address Information
+            BillingAddressLine1 = request.BillingAddressLine1,
+            BillingAddressLine2 = request.BillingAddressLine2,
+            BillingCity = request.BillingCity,
+            BillingState = request.BillingState,
+            BillingPostalCode = request.BillingPostalCode,
+            BillingCountry = request.BillingCountry,
+
+            // Shipping Address Information
+            ShippingAddressLine1 = request.ShippingAddressLine1,
+            ShippingAddressLine2 = request.ShippingAddressLine2,
+            ShippingCity = request.ShippingCity,
+            ShippingState = request.ShippingState,
+            ShippingPostalCode = request.ShippingPostalCode,
+            ShippingCountry = request.ShippingCountry,
+
+            // Contact Information
+            Phone = request.Phone,
+            Fax = request.Fax,
+            Email = request.Email
         };
 
         return await _accountRepository.CreateAsync(createAccountRequest, request.CreatedBy, cancellationToken);

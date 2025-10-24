@@ -29,6 +29,21 @@ public class AccountsDbContext : DbContext
             entity.HasIndex(e => e.IsActive)
                 .HasDatabaseName("IX_Accounts_IsActive");
 
+            entity.HasIndex(e => e.AccountType)
+                .HasDatabaseName("IX_Accounts_AccountType");
+
+            entity.HasIndex(e => e.AccountStatus)
+                .HasDatabaseName("IX_Accounts_AccountStatus");
+
+            entity.HasIndex(e => e.OwnerId)
+                .HasDatabaseName("IX_Accounts_OwnerId");
+
+            entity.HasIndex(e => e.ParentAccountId)
+                .HasDatabaseName("IX_Accounts_ParentAccountId");
+
+            entity.HasIndex(e => e.AccountNumber)
+                .HasDatabaseName("IX_Accounts_AccountNumber");
+
             // Configure one-to-many relationship: Account -> Contacts
             entity.HasMany(a => a.Contacts)
                 .WithOne(c => c.Account)
@@ -63,12 +78,36 @@ public class AccountsDbContext : DbContext
             entity.HasIndex(e => e.IsActive)
                 .HasDatabaseName("IX_Contacts_IsActive");
 
+            entity.HasIndex(e => new { e.FirstName, e.LastName })
+                .HasDatabaseName("IX_Contacts_FirstName_LastName");
+
+            entity.HasIndex(e => e.IsPrimaryContact)
+                .HasDatabaseName("IX_Contacts_IsPrimaryContact");
+
+            entity.HasIndex(e => e.OwnerId)
+                .HasDatabaseName("IX_Contacts_OwnerId");
+
+            entity.HasIndex(e => e.ReportsToId)
+                .HasDatabaseName("IX_Contacts_ReportsToId");
+
             // Configure default values
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("GETUTCDATE()");
 
             entity.Property(e => e.IsActive)
                 .HasDefaultValue(true);
+
+            entity.Property(e => e.IsPrimaryContact)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.DoNotCall)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.DoNotEmail)
+                .HasDefaultValue(false);
+
+            entity.Property(e => e.HasOptedOutOfEmail)
+                .HasDefaultValue(false);
         });
 
         // Global query filter for soft deletes

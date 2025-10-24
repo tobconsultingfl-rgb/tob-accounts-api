@@ -41,15 +41,49 @@ public class ContactRepository : IContactRepository
             AccountId = createContactRequest.AccountId,
             FirstName = createContactRequest.FirstName,
             LastName = createContactRequest.LastName,
+            MiddleName = createContactRequest.MiddleName,
+            Salutation = createContactRequest.Salutation,
+            JobTitle = createContactRequest.JobTitle,
+            Department = createContactRequest.Department,
+            IsPrimaryContact = createContactRequest.IsPrimaryContact,
+            ReportsToId = createContactRequest.ReportsToId,
+            OwnerId = createContactRequest.OwnerId,
+
+            // Contact Information
             Email = createContactRequest.Email,
+            SecondaryEmail = createContactRequest.SecondaryEmail,
             PhoneNumber = createContactRequest.PhoneNumber,
             MobileNumber = createContactRequest.MobileNumber,
-            AddressLine1 = createContactRequest.AddressLine1,
-            AddressLine2 = createContactRequest.AddressLine2,
-            City = createContactRequest.City,
-            State = createContactRequest.State,
-            PostalCode = createContactRequest.PostalCode,
-            Country = createContactRequest.Country,
+            HomePhone = createContactRequest.HomePhone,
+            OtherPhone = createContactRequest.OtherPhone,
+            Fax = createContactRequest.Fax,
+            LinkedIn = createContactRequest.LinkedIn,
+            Twitter = createContactRequest.Twitter,
+            Notes = createContactRequest.Notes,
+
+            // Mailing Address Information
+            MailingAddressLine1 = createContactRequest.MailingAddressLine1,
+            MailingAddressLine2 = createContactRequest.MailingAddressLine2,
+            MailingCity = createContactRequest.MailingCity,
+            MailingState = createContactRequest.MailingState,
+            MailingPostalCode = createContactRequest.MailingPostalCode,
+            MailingCountry = createContactRequest.MailingCountry,
+
+            // Other Address Information
+            OtherAddressLine1 = createContactRequest.OtherAddressLine1,
+            OtherAddressLine2 = createContactRequest.OtherAddressLine2,
+            OtherCity = createContactRequest.OtherCity,
+            OtherState = createContactRequest.OtherState,
+            OtherPostalCode = createContactRequest.OtherPostalCode,
+            OtherCountry = createContactRequest.OtherCountry,
+
+            Birthdate = createContactRequest.Birthdate,
+
+            // Preferences
+            DoNotCall = createContactRequest.DoNotCall,
+            DoNotEmail = createContactRequest.DoNotEmail,
+            HasOptedOutOfEmail = createContactRequest.HasOptedOutOfEmail,
+
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
@@ -73,15 +107,49 @@ public class ContactRepository : IContactRepository
 
         contact.FirstName = updateContactRequest.FirstName;
         contact.LastName = updateContactRequest.LastName;
+        contact.MiddleName = updateContactRequest.MiddleName;
+        contact.Salutation = updateContactRequest.Salutation;
+        contact.JobTitle = updateContactRequest.JobTitle;
+        contact.Department = updateContactRequest.Department;
+        contact.IsPrimaryContact = updateContactRequest.IsPrimaryContact;
+        contact.ReportsToId = updateContactRequest.ReportsToId;
+        contact.OwnerId = updateContactRequest.OwnerId;
+
+        // Contact Information
         contact.Email = updateContactRequest.Email;
+        contact.SecondaryEmail = updateContactRequest.SecondaryEmail;
         contact.PhoneNumber = updateContactRequest.PhoneNumber;
         contact.MobileNumber = updateContactRequest.MobileNumber;
-        contact.AddressLine1 = updateContactRequest.AddressLine1;
-        contact.AddressLine2 = updateContactRequest.AddressLine2;
-        contact.City = updateContactRequest.City;
-        contact.State = updateContactRequest.State;
-        contact.PostalCode = updateContactRequest.PostalCode;
-        contact.Country = updateContactRequest.Country;
+        contact.HomePhone = updateContactRequest.HomePhone;
+        contact.OtherPhone = updateContactRequest.OtherPhone;
+        contact.Fax = updateContactRequest.Fax;
+        contact.LinkedIn = updateContactRequest.LinkedIn;
+        contact.Twitter = updateContactRequest.Twitter;
+        contact.Notes = updateContactRequest.Notes;
+
+        // Mailing Address Information
+        contact.MailingAddressLine1 = updateContactRequest.MailingAddressLine1;
+        contact.MailingAddressLine2 = updateContactRequest.MailingAddressLine2;
+        contact.MailingCity = updateContactRequest.MailingCity;
+        contact.MailingState = updateContactRequest.MailingState;
+        contact.MailingPostalCode = updateContactRequest.MailingPostalCode;
+        contact.MailingCountry = updateContactRequest.MailingCountry;
+
+        // Other Address Information
+        contact.OtherAddressLine1 = updateContactRequest.OtherAddressLine1;
+        contact.OtherAddressLine2 = updateContactRequest.OtherAddressLine2;
+        contact.OtherCity = updateContactRequest.OtherCity;
+        contact.OtherState = updateContactRequest.OtherState;
+        contact.OtherPostalCode = updateContactRequest.OtherPostalCode;
+        contact.OtherCountry = updateContactRequest.OtherCountry;
+
+        contact.Birthdate = updateContactRequest.Birthdate;
+
+        // Preferences
+        contact.DoNotCall = updateContactRequest.DoNotCall;
+        contact.DoNotEmail = updateContactRequest.DoNotEmail;
+        contact.HasOptedOutOfEmail = updateContactRequest.HasOptedOutOfEmail;
+
         contact.IsActive = updateContactRequest.IsActive;
         contact.UpdatedAt = DateTime.UtcNow;
         contact.UpdatedBy = updatedBy;

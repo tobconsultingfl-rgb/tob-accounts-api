@@ -15,15 +15,41 @@ public static class AccountExtensions
             AccountId = account.AccountId,
             TenantId = account.TenantId,
             Name = account.Name,
-            AddressLine1 = account.AddressLine1,
-            AddressLine2 = account.AddressLine2,
-            City = account.City,
-            State = account.State,
-            PostalCode = account.PostalCode,
-            Country = account.Country,
-            PrimaryContactName = account.PrimaryContactName,
-            PrimaryContactEmail = account.PrimaryContactEmail,
-            PrimaryContactPhone = account.PrimaryContactPhone,
+
+            // CRM Business Information
+            AccountType = account.AccountType,
+            AccountStatus = account.AccountStatus,
+            Industry = account.Industry,
+            AnnualRevenue = account.AnnualRevenue,
+            NumberOfEmployees = account.NumberOfEmployees,
+            Website = account.Website,
+            Description = account.Description,
+            AccountNumber = account.AccountNumber,
+            ParentAccountId = account.ParentAccountId,
+            OwnerId = account.OwnerId,
+            Rating = account.Rating,
+
+            // Billing Address Information
+            BillingAddressLine1 = account.BillingAddressLine1,
+            BillingAddressLine2 = account.BillingAddressLine2,
+            BillingCity = account.BillingCity,
+            BillingState = account.BillingState,
+            BillingPostalCode = account.BillingPostalCode,
+            BillingCountry = account.BillingCountry,
+
+            // Shipping Address Information
+            ShippingAddressLine1 = account.ShippingAddressLine1,
+            ShippingAddressLine2 = account.ShippingAddressLine2,
+            ShippingCity = account.ShippingCity,
+            ShippingState = account.ShippingState,
+            ShippingPostalCode = account.ShippingPostalCode,
+            ShippingCountry = account.ShippingCountry,
+
+            // Contact Information
+            Phone = account.Phone,
+            Fax = account.Fax,
+            Email = account.Email,
+
             IsActive = account.IsActive,
             CreatedAt = account.CreatedAt,
             CreatedBy = account.CreatedBy,
@@ -49,15 +75,41 @@ public static class AccountExtensions
             AccountId = dto.AccountId,
             TenantId = dto.TenantId,
             Name = dto.Name,
-            AddressLine1 = dto.AddressLine1,
-            AddressLine2 = dto.AddressLine2,
-            City = dto.City,
-            State = dto.State,
-            PostalCode = dto.PostalCode,
-            Country = dto.Country,
-            PrimaryContactName = dto.PrimaryContactName,
-            PrimaryContactEmail = dto.PrimaryContactEmail,
-            PrimaryContactPhone = dto.PrimaryContactPhone,
+
+            // CRM Business Information
+            AccountType = dto.AccountType,
+            AccountStatus = dto.AccountStatus,
+            Industry = dto.Industry,
+            AnnualRevenue = dto.AnnualRevenue,
+            NumberOfEmployees = dto.NumberOfEmployees,
+            Website = dto.Website,
+            Description = dto.Description,
+            AccountNumber = dto.AccountNumber,
+            ParentAccountId = dto.ParentAccountId,
+            OwnerId = dto.OwnerId,
+            Rating = dto.Rating,
+
+            // Billing Address Information
+            BillingAddressLine1 = dto.BillingAddressLine1,
+            BillingAddressLine2 = dto.BillingAddressLine2,
+            BillingCity = dto.BillingCity,
+            BillingState = dto.BillingState,
+            BillingPostalCode = dto.BillingPostalCode,
+            BillingCountry = dto.BillingCountry,
+
+            // Shipping Address Information
+            ShippingAddressLine1 = dto.ShippingAddressLine1,
+            ShippingAddressLine2 = dto.ShippingAddressLine2,
+            ShippingCity = dto.ShippingCity,
+            ShippingState = dto.ShippingState,
+            ShippingPostalCode = dto.ShippingPostalCode,
+            ShippingCountry = dto.ShippingCountry,
+
+            // Contact Information
+            Phone = dto.Phone,
+            Fax = dto.Fax,
+            Email = dto.Email,
+
             IsActive = dto.IsActive,
             CreatedAt = dto.CreatedAt,
             CreatedBy = dto.CreatedBy,
@@ -72,15 +124,41 @@ public static class AccountExtensions
     public static void UpdateFromDto(this Account account, AccountDto dto)
     {
         account.Name = dto.Name;
-        account.AddressLine1 = dto.AddressLine1;
-        account.AddressLine2 = dto.AddressLine2;
-        account.City = dto.City;
-        account.State = dto.State;
-        account.PostalCode = dto.PostalCode;
-        account.Country = dto.Country;
-        account.PrimaryContactName = dto.PrimaryContactName;
-        account.PrimaryContactEmail = dto.PrimaryContactEmail;
-        account.PrimaryContactPhone = dto.PrimaryContactPhone;
+
+        // CRM Business Information
+        account.AccountType = dto.AccountType;
+        account.AccountStatus = dto.AccountStatus;
+        account.Industry = dto.Industry;
+        account.AnnualRevenue = dto.AnnualRevenue;
+        account.NumberOfEmployees = dto.NumberOfEmployees;
+        account.Website = dto.Website;
+        account.Description = dto.Description;
+        account.AccountNumber = dto.AccountNumber;
+        account.ParentAccountId = dto.ParentAccountId;
+        account.OwnerId = dto.OwnerId;
+        account.Rating = dto.Rating;
+
+        // Billing Address Information
+        account.BillingAddressLine1 = dto.BillingAddressLine1;
+        account.BillingAddressLine2 = dto.BillingAddressLine2;
+        account.BillingCity = dto.BillingCity;
+        account.BillingState = dto.BillingState;
+        account.BillingPostalCode = dto.BillingPostalCode;
+        account.BillingCountry = dto.BillingCountry;
+
+        // Shipping Address Information
+        account.ShippingAddressLine1 = dto.ShippingAddressLine1;
+        account.ShippingAddressLine2 = dto.ShippingAddressLine2;
+        account.ShippingCity = dto.ShippingCity;
+        account.ShippingState = dto.ShippingState;
+        account.ShippingPostalCode = dto.ShippingPostalCode;
+        account.ShippingCountry = dto.ShippingCountry;
+
+        // Contact Information
+        account.Phone = dto.Phone;
+        account.Fax = dto.Fax;
+        account.Email = dto.Email;
+
         account.IsActive = dto.IsActive;
         // Note: TenantId and AccountId should not be updated
         // Audit fields will be updated by DbContext
