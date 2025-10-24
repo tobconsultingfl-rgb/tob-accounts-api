@@ -43,6 +43,13 @@ jobs:
       failTaskOnFailedTests: true
     condition: succeededOrFailed()
 
+  - task: PublishCodeCoverageResults@2
+    displayName: Publish code coverage
+    inputs:
+      summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'
+      pathToSources: '$(Build.SourcesDirectory)'
+    condition: succeededOrFailed()
+
   - task: DotNetCoreCLI@2
     inputs:
       command: 'publish'
