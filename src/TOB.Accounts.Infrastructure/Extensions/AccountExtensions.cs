@@ -16,10 +16,10 @@ public static class AccountExtensions
             TenantId = account.TenantId,
             Name = account.Name,
 
-            // CRM Business Information
-            AccountType = account.AccountType,
-            AccountStatus = account.AccountStatus,
-            Industry = account.Industry,
+            // CRM Business Information - Flatten lookup navigation properties to strings
+            AccountType = account.AccountType?.Name,
+            AccountStatus = account.AccountStatus?.Name,
+            Industry = account.Industry?.Name,
             AnnualRevenue = account.AnnualRevenue,
             NumberOfEmployees = account.NumberOfEmployees,
             Website = account.Website,
@@ -77,9 +77,7 @@ public static class AccountExtensions
             Name = dto.Name,
 
             // CRM Business Information
-            AccountType = dto.AccountType,
-            AccountStatus = dto.AccountStatus,
-            Industry = dto.Industry,
+            // Note: AccountTypeId, AccountStatusId, IndustryId will be set by repository/service layer
             AnnualRevenue = dto.AnnualRevenue,
             NumberOfEmployees = dto.NumberOfEmployees,
             Website = dto.Website,
@@ -126,9 +124,7 @@ public static class AccountExtensions
         account.Name = dto.Name;
 
         // CRM Business Information
-        account.AccountType = dto.AccountType;
-        account.AccountStatus = dto.AccountStatus;
-        account.Industry = dto.Industry;
+        // Note: AccountTypeId, AccountStatusId, IndustryId will be updated by repository/service layer
         account.AnnualRevenue = dto.AnnualRevenue;
         account.NumberOfEmployees = dto.NumberOfEmployees;
         account.Website = dto.Website;

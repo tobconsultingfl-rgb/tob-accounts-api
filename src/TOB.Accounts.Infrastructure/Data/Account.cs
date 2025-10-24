@@ -16,15 +16,15 @@ public class Account
     [MaxLength(200)]
     public required string Name { get; set; }
 
-    // CRM Business Information
-    [MaxLength(50)]
-    public string? AccountType { get; set; } // Customer, Prospect, Partner, Vendor, Competitor
+    // CRM Business Information - Lookup Foreign Keys
+    [ForeignKey(nameof(AccountType))]
+    public Guid? AccountTypeId { get; set; }
 
-    [MaxLength(50)]
-    public string? AccountStatus { get; set; } // Active, Inactive, On Hold, Closed
+    [ForeignKey(nameof(AccountStatus))]
+    public Guid? AccountStatusId { get; set; }
 
-    [MaxLength(100)]
-    public string? Industry { get; set; }
+    [ForeignKey(nameof(Industry))]
+    public Guid? IndustryId { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
     public decimal? AnnualRevenue { get; set; }
@@ -102,6 +102,11 @@ public class Account
 
     // Navigation property for related documents
     public ICollection<AccountDocument> Documents { get; set; } = new List<AccountDocument>();
+
+    // Navigation properties for lookups
+    public AccountType? AccountType { get; set; }
+    public AccountStatus? AccountStatus { get; set; }
+    public Industry? Industry { get; set; }
 
     // Soft delete flag
     public bool IsActive { get; set; } = true;

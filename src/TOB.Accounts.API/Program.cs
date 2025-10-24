@@ -124,6 +124,9 @@ builder.Services.AddDbContext<AccountsDbContext>((serviceProvider, options) =>
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
 builder.Services.AddScoped<IAccountDocumentRepository, AccountDocumentRepository>();
+builder.Services.AddScoped<IAccountTypeRepository, AccountTypeRepository>();
+builder.Services.AddScoped<IAccountStatusRepository, AccountStatusRepository>();
+builder.Services.AddScoped<IIndustryRepository, IndustryRepository>();
 
 // Register services
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();

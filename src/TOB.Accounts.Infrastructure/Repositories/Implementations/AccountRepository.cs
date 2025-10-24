@@ -18,6 +18,9 @@ public class AccountRepository : IAccountRepository
     public async Task<IEnumerable<AccountDto>> GetAllAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
         var accounts = await _context.Accounts
+            .Include(a => a.AccountType)
+            .Include(a => a.AccountStatus)
+            .Include(a => a.Industry)
             .Where(a => a.TenantId == tenantId.ToString())
             .ToListAsync(cancellationToken);
 
@@ -27,6 +30,9 @@ public class AccountRepository : IAccountRepository
     public async Task<AccountDto?> GetByIdAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
         var account = await _context.Accounts
+            .Include(a => a.AccountType)
+            .Include(a => a.AccountStatus)
+            .Include(a => a.Industry)
             .FirstOrDefaultAsync(a => a.AccountId == accountId, cancellationToken);
 
         return account?.ToDto(includeContacts: false);
@@ -35,6 +41,9 @@ public class AccountRepository : IAccountRepository
     public async Task<IEnumerable<AccountDto>> GetAllWithContactsAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
         var accounts = await _context.Accounts
+            .Include(a => a.AccountType)
+            .Include(a => a.AccountStatus)
+            .Include(a => a.Industry)
             .Include(a => a.Contacts)
             .Where(a => a.TenantId == tenantId.ToString())
             .ToListAsync(cancellationToken);
@@ -45,6 +54,9 @@ public class AccountRepository : IAccountRepository
     public async Task<AccountDto?> GetByIdWithContactsAsync(Guid accountId, CancellationToken cancellationToken = default)
     {
         var account = await _context.Accounts
+            .Include(a => a.AccountType)
+            .Include(a => a.AccountStatus)
+            .Include(a => a.Industry)
             .Include(a => a.Contacts)
             .FirstOrDefaultAsync(a => a.AccountId == accountId, cancellationToken);
 
@@ -53,6 +65,11 @@ public class AccountRepository : IAccountRepository
 
     public async Task<AccountDto> CreateAsync(CreateAccountRequest createAccountRequest, string createdBy, CancellationToken cancellationToken = default)
     {
+        // Look up IDs for lookup fields
+        var accountTypeId = await GetAccountTypeIdByNameAsync(createAccountRequest.AccountType, cancellationToken);
+        var accountStatusId = await GetAccountStatusIdByNameAsync(createAccountRequest.AccountStatus, cancellationToken);
+        var industryId = await GetIndustryIdByNameAsync(createAccountRequest.Industry, cancellationToken);
+
         var account = new Account
         {
             AccountId = Guid.NewGuid(),
@@ -60,9 +77,9 @@ public class AccountRepository : IAccountRepository
             Name = createAccountRequest.Name,
 
             // CRM Business Information
-            AccountType = createAccountRequest.AccountType,
-            AccountStatus = createAccountRequest.AccountStatus,
-            Industry = createAccountRequest.Industry,
+            AccountTypeId = accountTypeId,
+            AccountStatusId = accountStatusId,
+            IndustryId = industryId,
             AnnualRevenue = createAccountRequest.AnnualRevenue,
             NumberOfEmployees = createAccountRequest.NumberOfEmployees,
             Website = createAccountRequest.Website,
@@ -101,7 +118,14 @@ public class AccountRepository : IAccountRepository
         _context.Accounts.Add(account);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return account.ToDto(includeContacts: false);
+        // Reload account with navigation properties
+        var createdAccount = await _context.Accounts
+            .Include(a => a.AccountType)
+            .Include(a => a.AccountStatus)
+            .Include(a => a.Industry)
+            .FirstOrDefaultAsync(a => a.AccountId == account.AccountId, cancellationToken);
+
+        return createdAccount!.ToDto(includeContacts: false);
     }
 
     public async Task<AccountDto?> UpdateAsync(UpdateAccountRequest updateAccountRequest, string updatedBy, CancellationToken cancellationToken = default)
@@ -114,12 +138,17 @@ public class AccountRepository : IAccountRepository
             return null;
         }
 
+        // Look up IDs for lookup fields
+        var accountTypeId = await GetAccountTypeIdByNameAsync(updateAccountRequest.AccountType, cancellationToken);
+        var accountStatusId = await GetAccountStatusIdByNameAsync(updateAccountRequest.AccountStatus, cancellationToken);
+        var industryId = await GetIndustryIdByNameAsync(updateAccountRequest.Industry, cancellationToken);
+
         account.Name = updateAccountRequest.Name;
 
         // CRM Business Information
-        account.AccountType = updateAccountRequest.AccountType;
-        account.AccountStatus = updateAccountRequest.AccountStatus;
-        account.Industry = updateAccountRequest.Industry;
+        account.AccountTypeId = accountTypeId;
+        account.AccountStatusId = accountStatusId;
+        account.IndustryId = industryId;
         account.AnnualRevenue = updateAccountRequest.AnnualRevenue;
         account.NumberOfEmployees = updateAccountRequest.NumberOfEmployees;
         account.Website = updateAccountRequest.Website;
@@ -156,7 +185,14 @@ public class AccountRepository : IAccountRepository
 
         await _context.SaveChangesAsync(cancellationToken);
 
-        return account.ToDto(includeContacts: false);
+        // Reload account with navigation properties
+        var updatedAccount = await _context.Accounts
+            .Include(a => a.AccountType)
+            .Include(a => a.AccountStatus)
+            .Include(a => a.Industry)
+            .FirstOrDefaultAsync(a => a.AccountId == account.AccountId, cancellationToken);
+
+        return updatedAccount!.ToDto(includeContacts: false);
     }
 
     public async Task<bool> DeleteAsync(Guid accountId, string deletedBy, CancellationToken cancellationToken = default)
@@ -183,5 +219,44 @@ public class AccountRepository : IAccountRepository
     {
         return await _context.Accounts
             .AnyAsync(a => a.Name == accountName && a.TenantId == tenantId.ToString(), cancellationToken);
+    }
+
+    private async Task<Guid?> GetAccountTypeIdByNameAsync(string? accountTypeName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(accountTypeName))
+        {
+            return null;
+        }
+
+        var accountType = await _context.AccountTypes
+            .FirstOrDefaultAsync(at => at.Name == accountTypeName, cancellationToken);
+
+        return accountType?.AccountTypeId;
+    }
+
+    private async Task<Guid?> GetAccountStatusIdByNameAsync(string? accountStatusName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(accountStatusName))
+        {
+            return null;
+        }
+
+        var accountStatus = await _context.AccountStatuses
+            .FirstOrDefaultAsync(ast => ast.Name == accountStatusName, cancellationToken);
+
+        return accountStatus?.AccountStatusId;
+    }
+
+    private async Task<Guid?> GetIndustryIdByNameAsync(string? industryName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(industryName))
+        {
+            return null;
+        }
+
+        var industry = await _context.Industries
+            .FirstOrDefaultAsync(i => i.Name == industryName, cancellationToken);
+
+        return industry?.IndustryId;
     }
 }
