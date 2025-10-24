@@ -1,6 +1,6 @@
 # TOB Accounts API
 
-A multi-tenant accounts and contacts management API built with .NET 9, following clean architecture principles with CQRS pattern, secured with Microsoft Entra External ID.
+A comprehensive multi-tenant CRM API built with .NET 9, featuring account management, contact management, document storage with Azure Blob Storage, and enterprise-grade observability. Built following clean architecture principles with CQRS pattern, secured with Microsoft Entra External ID.
 
 ## Table of Contents
 
@@ -21,16 +21,19 @@ A multi-tenant accounts and contacts management API built with .NET 9, following
 
 ## Overview
 
-The TOB Accounts API is a secure, multi-tenant REST API for managing accounts and contacts. It implements enterprise-grade security with role-based access control, comprehensive observability with OpenTelemetry, and follows clean architecture patterns for maintainability and testability.
+The TOB Accounts API is a secure, multi-tenant CRM REST API for managing accounts, contacts, and associated documents. It implements enterprise-grade security with role-based access control, comprehensive observability with Azure Monitor, file storage with Azure Blob Storage, and follows clean architecture patterns for maintainability and testability.
 
 ### Key Capabilities
 
 - **Multi-Tenant Architecture**: Isolated data access per tenant with Super Admin cross-tenant access
+- **CRM-Focused Data Model**: Rich account and contact entities with industry, revenue, job titles, hierarchies, and more
+- **Document Management**: Upload, download, and manage files with Azure Blob Storage integration
 - **CQRS Pattern**: Separation of read and write operations using MediatR
 - **Soft Deletes**: Audit-friendly data retention with IsActive flags
 - **Role-Based Access Control**: Tenant-isolated regular users and cross-tenant Super Admin role
-- **Comprehensive Observability**: Distributed tracing, metrics, and logging with OpenTelemetry
+- **Azure Monitor Integration**: Automatic telemetry export to Application Insights with distributed tracing
 - **Secure by Default**: Microsoft Entra External ID authentication with JWT Bearer tokens
+- **File Storage**: Secure document management with Azure Blob Storage and metadata tracking
 
 ## Architecture
 
@@ -76,11 +79,42 @@ This solution follows **Clean Architecture** principles with clear separation of
 - Super Admin role can access all tenants
 - Regular users restricted to their own tenant
 
+### CRM Features
+
+#### Accounts Management
+- **Business Information**: Account type, status, industry, annual revenue, employee count
+- **Contact Details**: Phone, fax, email, website
+- **Hierarchies**: Parent-child account relationships with GUID references
+- **Address Management**: Separate billing and shipping addresses
+- **Ownership**: Assign accounts to specific users via owner ID
+- **Rating System**: Track account priority (Hot, Warm, Cold)
+- **Custom Fields**: Account number, description, and more
+
+#### Contacts Management
+- **Personal Information**: Name (first, middle, last), salutation, birthdate
+- **Professional Details**: Job title, department, reporting structure
+- **Multiple Contact Methods**: Primary email, secondary email, phone, mobile, home phone, fax
+- **Address Tracking**: Mailing address and alternate address
+- **Social Integration**: LinkedIn, Twitter profiles
+- **Hierarchy Support**: ReportsTo relationship for org charts
+- **Primary Contact Flag**: Designate main contact for accounts
+- **Communication Preferences**: DoNotCall, DoNotEmail, HasOptedOutOfEmail flags
+
+#### Document Management
+- **File Upload**: Secure file upload to Azure Blob Storage (50MB limit)
+- **File Download**: Stream files directly from blob storage
+- **Metadata Tracking**: Filename, content type, file size, category, description
+- **Categorization**: Organize documents (Invoice, Contract, Proposal, etc.)
+- **Blob URL Storage**: Direct links to files in blob storage
+- **Soft Delete**: Maintain document history with soft delete support
+- **Tenant Isolation**: Documents scoped to accounts and tenants
+
 ### CRUD Operations
 - **Accounts**: Create, Read, Update, Delete (soft delete)
 - **Contacts**: Create, Read, Update, Delete (soft delete) - nested under accounts
-- One-to-many relationship (Account → Contacts)
-- RESTful nested routes: `/api/accounts/{accountId}/contacts`
+- **Documents**: Upload, Download, List, Delete (soft delete) - nested under accounts
+- One-to-many relationships (Account → Contacts, Account → Documents)
+- RESTful nested routes for resources
 
 ### Security Features
 - Microsoft Entra External ID authentication
@@ -89,20 +123,24 @@ This solution follows **Clean Architecture** principles with clear separation of
 - CORS support with configurable origins
 - HTTPS enforcement
 - Secrets stored in Azure Key Vault
+- Storage Blob Data Contributor role for managed identity
+- Secure file access with tenant validation
 
 ### Observability
-- **Distributed Tracing**: ASP.NET Core, HTTP Client, Entity Framework Core
-- **Metrics**: Request rates, durations, custom business metrics
-- **Logging**: Structured logging with OpenTelemetry
-- **Application Insights**: Integration for Azure monitoring
-- **OTLP Export**: Compatible with any OpenTelemetry collector
+- **Azure Monitor Integration**: Automatic telemetry export via `Azure.Monitor.OpenTelemetry.AspNetCore`
+- **Distributed Tracing**: ASP.NET Core, HTTP Client, Entity Framework Core, Azure Storage
+- **Metrics**: Request rates, durations, dependency tracking
+- **Logging**: Structured logging sent to Application Insights
+- **Application Insights**: Complete APM solution with live metrics
+- **Performance Monitoring**: Automatic instrumentation with zero configuration
 
 ### Data Management
-- Soft deletes with `IsActive` flag
+- Soft deletes with `IsActive` flag across all entities
 - Audit fields: `CreatedAt`, `CreatedBy`, `UpdatedAt`, `UpdatedBy`
-- Entity Framework Core with SQL Server
-- Code-first migrations
+- Entity Framework Core 9 with SQL Server
+- Code-first migrations with comprehensive indexing
 - Global query filters for soft deletes
+- Optimized indexes for tenant queries, categories, and relationships
 
 ## Technologies
 
@@ -112,7 +150,7 @@ This solution follows **Clean Architecture** principles with clear separation of
 - **C# 13** - Latest language features
 
 ### Authentication & Authorization
-- **Microsoft.Identity.Web** - Microsoft Entra External ID integration
+- **Microsoft.Identity.Web 4.0** - Microsoft Entra External ID integration
 - **JWT Bearer Authentication** - Token-based security
 
 ### Data Access
@@ -123,15 +161,20 @@ This solution follows **Clean Architecture** principles with clear separation of
 ### CQRS & Mediator
 - **MediatR 13.0** - Command/Query pattern implementation
 
+### File Storage
+- **Azure.Storage.Blobs 12.26** - Azure Blob Storage SDK
+- **Blob Containers**: account-documents, contact-documents, uploads
+
 ### Observability
-- **OpenTelemetry 1.13+** - Distributed tracing, metrics, logging
-- **Application Insights** - Azure monitoring (production)
+- **Azure.Monitor.OpenTelemetry.AspNetCore 1.3** - Automatic Azure Monitor integration
+- **Application Insights** - APM, distributed tracing, metrics, logging
 
 ### Azure Services
-- **Azure App Service** - Hosting platform
+- **Azure App Service** - Hosting platform with managed identity
 - **Azure Key Vault** - Secrets management
-- **Azure SQL Database** - Managed database
-- **Azure Application Insights** - APM and monitoring
+- **Azure SQL Database** - Managed relational database
+- **Azure Application Insights** - Complete observability solution
+- **Azure Blob Storage** - Secure, scalable file storage
 
 ### API Documentation
 - **Swashbuckle** - Swagger/OpenAPI documentation
@@ -226,17 +269,12 @@ Configuration is managed through `appsettings.json` and environment-specific ove
 }
 ```
 
-#### OpenTelemetry
+#### Azure Storage (for file uploads)
 ```json
 {
-  "OpenTelemetry": {
-    "UseConsoleExporter": true,
-    "OtlpEndpoint": "http://localhost:4317",
-    "ServiceName": "TOB.Accounts.API",
-    "ServiceVersion": "1.0.0",
-    "EnableTracing": true,
-    "EnableMetrics": true,
-    "EnableLogging": true
+  "AzureStorage": {
+    "ConnectionString": "your-storage-connection-string",
+    "AccountName": "your-storage-account-name"
   }
 }
 ```
@@ -252,12 +290,14 @@ Configuration is managed through `appsettings.json` and environment-specific ove
 
 ### Environment Variables
 
-For production, sensitive values should be stored in Azure Key Vault or environment variables:
+For production, sensitive values are automatically injected via Azure App Service configuration or stored in Azure Key Vault:
 
-- `ConnectionStrings__DefaultConnection`
-- `AzureAd__TenantId`
-- `AzureAd__ClientId`
-- `AzureAd__Audience`
+- `ConnectionStrings__AccountsDBContext` - Database connection string
+- `AzureAd__TenantId` - Microsoft Entra tenant ID
+- `AzureAd__ClientId` - Application client ID
+- `AzureStorage__ConnectionString` - Azure Storage connection string
+- `AzureStorage__AccountName` - Storage account name
+- `APPLICATIONINSIGHTS_CONNECTION_STRING` - Application Insights connection (auto-configured)
 
 ## Running the Application
 
@@ -325,6 +365,20 @@ Contacts are nested under accounts in the API hierarchy. All contact operations 
 
 **Note:** Super Admins can access contacts for accounts in any tenant.
 
+#### Documents
+
+Documents are nested under accounts. Files are stored securely in Azure Blob Storage with metadata tracked in the database.
+
+| Method | Endpoint | Description | Access |
+|--------|----------|-------------|--------|
+| GET | `/api/accounts/{accountId}/documents` | List all documents for an account | Authenticated (account must belong to user's tenant) |
+| GET | `/api/accounts/{accountId}/documents/{id}` | Get document metadata | Authenticated (account must belong to user's tenant) |
+| GET | `/api/accounts/{accountId}/documents/{id}/download` | Download file | Authenticated (account must belong to user's tenant) |
+| POST | `/api/accounts/{accountId}/documents` | Upload file (multipart/form-data, 50MB max) | Authenticated (account must belong to user's tenant) |
+| DELETE | `/api/accounts/{accountId}/documents/{id}` | Soft delete document | Authenticated (account must belong to user's tenant) |
+
+**Note:** Files are stored in Azure Blob Storage with tenant isolation. Super Admins can access documents for any tenant.
+
 ### Sample Requests
 
 **Create Account**
@@ -336,14 +390,26 @@ Content-Type: application/json
 {
   "tenantId": "tenant-guid",
   "name": "Acme Corporation",
-  "addressLine1": "123 Main St",
-  "city": "New York",
-  "state": "NY",
-  "postalCode": "10001",
-  "country": "USA",
-  "primaryContactName": "John Doe",
-  "primaryContactEmail": "john@acme.com",
-  "primaryContactPhone": "+1-555-0100",
+  "accountType": "Customer",
+  "accountStatus": "Active",
+  "industry": "Technology",
+  "annualRevenue": 5000000.00,
+  "numberOfEmployees": 250,
+  "website": "https://acme.com",
+  "description": "Leading technology solutions provider",
+  "rating": "Hot",
+  "billingAddressLine1": "123 Main St",
+  "billingCity": "New York",
+  "billingState": "NY",
+  "billingPostalCode": "10001",
+  "billingCountry": "USA",
+  "shippingAddressLine1": "456 Industrial Park",
+  "shippingCity": "Newark",
+  "shippingState": "NJ",
+  "shippingPostalCode": "07102",
+  "shippingCountry": "USA",
+  "phone": "+1-555-0100",
+  "email": "info@acme.com",
   "createdBy": "user@example.com"
 }
 ```
@@ -357,18 +423,42 @@ Content-Type: application/json
 {
   "tenantId": "tenant-guid",
   "accountId": "account-guid",
+  "salutation": "Ms.",
   "firstName": "Jane",
   "lastName": "Smith",
+  "jobTitle": "VP of Sales",
+  "department": "Sales",
+  "isPrimaryContact": true,
   "email": "jane.smith@acme.com",
+  "secondaryEmail": "j.smith@acme.com",
   "phoneNumber": "+1-555-0101",
   "mobileNumber": "+1-555-0102",
-  "addressLine1": "456 Oak Ave",
-  "city": "Boston",
-  "state": "MA",
-  "postalCode": "02101",
-  "country": "USA",
+  "mailingAddressLine1": "456 Oak Ave",
+  "mailingCity": "Boston",
+  "mailingState": "MA",
+  "mailingPostalCode": "02101",
+  "mailingCountry": "USA",
+  "linkedIn": "https://linkedin.com/in/janesmith",
   "createdBy": "user@example.com"
 }
+```
+
+**Upload Document for Account**
+```bash
+POST /api/accounts/{account-guid}/documents
+Authorization: Bearer {token}
+Content-Type: multipart/form-data
+
+file: [binary file data]
+category: "Invoice"
+description: "Q4 2024 Invoice"
+```
+
+**Download Document**
+```bash
+GET /api/accounts/{account-guid}/documents/{document-guid}/download
+Authorization: Bearer {token}
+# Returns file stream with appropriate Content-Type header
 ```
 
 **Get All Contacts for Account**
@@ -445,38 +535,66 @@ tob-accounts-api/
 ├── src/
 │   ├── TOB.Accounts.API/              # Web API layer
 │   │   ├── Controllers/               # API controllers
+│   │   │   ├── AccountsController.cs
+│   │   │   ├── ContactsController.cs
+│   │   │   └── AccountDocumentsController.cs
 │   │   ├── Exceptions/                # Global exception handlers
-│   │   ├── Telemetry/                 # OpenTelemetry configuration
 │   │   └── Program.cs                 # Application entry point
 │   │
 │   ├── TOB.Accounts.Domain/           # Domain layer (no dependencies)
-│   │   ├── Commands/                  # CQRS commands
-│   │   ├── Queries/                   # CQRS queries
-│   │   ├── Models/                    # DTOs
+│   │   ├── Commands/                  # CQRS commands (Create, Update, Delete, Upload)
+│   │   ├── Queries/                   # CQRS queries (Get, Download)
+│   │   ├── Models/                    # DTOs (Account, Contact, Document)
 │   │   ├── Requests/                  # Request models
 │   │   ├── Responses/                 # Response models
 │   │   └── AppSettings/               # Configuration classes
+│   │       ├── ConnectionStringsOptions.cs
+│   │       ├── AzureAdOptions.cs
+│   │       ├── AzureStorageOptions.cs
+│   │       ├── CorsOptions.cs
+│   │       └── KeyVaultOptions.cs
 │   │
 │   ├── TOB.Accounts.Infrastructure/   # Infrastructure layer
 │   │   ├── Data/                      # EF Core entities & DbContext
+│   │   │   ├── Account.cs
+│   │   │   ├── Contact.cs
+│   │   │   ├── AccountDocument.cs
+│   │   │   ├── AccountsDbContext.cs
+│   │   │   └── Migrations/
 │   │   ├── Extensions/                # Entity/DTO mapping extensions
+│   │   ├── Services/                  # Infrastructure services
+│   │   │   ├── IBlobStorageService.cs
+│   │   │   └── BlobStorageService.cs
 │   │   └── Repositories/              # Repository implementations
 │   │       ├── Implementations/
+│   │       │   ├── AccountRepository.cs
+│   │       │   ├── ContactRepository.cs
+│   │       │   └── AccountDocumentRepository.cs
 │   │       ├── IAccountRepository.cs
-│   │       └── IContactRepository.cs
+│   │       ├── IContactRepository.cs
+│   │       └── IAccountDocumentRepository.cs
 │   │
 │   ├── TOB.Accounts.Services/         # Application services layer
 │   │   └── Handlers/                  # MediatR handlers
-│   │       ├── CommandHandlers/
-│   │       └── QueryHandlers/
+│   │       ├── CommandHandlers/       # Create, Update, Delete, Upload
+│   │       └── QueryHandlers/         # Get, Download
 │   │
 │   └── TOB.Accounts.sln               # Solution file
 │
 ├── deploy/                            # Deployment artifacts
-│   ├── main.bicep                     # Infrastructure as Code
+│   ├── main.bicep                     # Infrastructure as Code (main)
+│   ├── modules/                       # Bicep modules
+│   │   ├── sqlDatabase.bicep
+│   │   ├── appService.bicep
+│   │   ├── appInsights.bicep
+│   │   ├── storageAccount.bicep       # Azure Blob Storage
+│   │   ├── storageRoleAssignment.bicep
+│   │   └── keyVaultSecret.bicep
+│   ├── pipeline-templates/            # CI/CD templates
+│   │   ├── deployInfrastructure.yml
+│   │   └── buildAndDeploy.yml
 │   ├── infrastructure-pipelines.yml   # Infrastructure pipeline
 │   ├── application-pipelines.yml      # Application pipeline
-│   ├── main.parameters.example.json   # Parameter template
 │   └── README.md                      # Deployment guide
 │
 └── README.md                          # This file
@@ -577,11 +695,54 @@ For issues and questions:
 - **Discussions**: [GitHub Discussions](https://github.com/your-org/tob-accounts-api/discussions)
 - **Email**: support@yourcompany.com
 
+## Recent Enhancements
+
+### v2.0 - CRM Features & Document Management (2025)
+
+**Enhanced Data Model for CRM**
+- ✅ Account entities enhanced with 15+ new CRM fields (industry, revenue, status, ratings, hierarchies)
+- ✅ Contact entities enhanced with 20+ new fields (job titles, departments, multiple contact methods, social profiles)
+- ✅ Separate billing and shipping addresses for accounts
+- ✅ Mailing and alternate addresses for contacts
+- ✅ Communication preferences (DoNotCall, DoNotEmail, HasOptedOutOfEmail)
+- ✅ All IDs standardized to GUID for better scalability
+
+**Document Management System**
+- ✅ Complete file management with Azure Blob Storage integration
+- ✅ Upload, download, list, and delete documents for accounts
+- ✅ Metadata tracking (filename, content type, file size, category, description)
+- ✅ 50MB file size limit with secure multipart upload
+- ✅ Three blob containers: account-documents, contact-documents, uploads
+- ✅ Tenant-isolated file access with soft delete support
+
+**Infrastructure & Observability**
+- ✅ Azure Blob Storage infrastructure with managed identity access
+- ✅ Application Insights with automatic configuration
+- ✅ Azure Monitor OpenTelemetry integration (replaced manual setup)
+- ✅ Simplified telemetry: 120+ lines reduced to 1 line
+- ✅ Database migrations for all entity changes
+- ✅ EF Core migrations automatically applied via CI/CD pipeline
+
+**Developer Experience**
+- ✅ Comprehensive Swagger documentation with JWT auth support
+- ✅ Clean architecture with clear separation of concerns
+- ✅ Azure Key Vault integration for secrets management
+- ✅ User secrets support for local development
+- ✅ Automated deployments with Infrastructure as Code
+
+### Database Migrations
+
+The API includes the following migrations:
+- **InitialCreate** - Initial database schema with Accounts and Contacts
+- **EnhancedCRMEntities** - Enhanced CRM fields for accounts and contacts
+- **AddAccountDocuments** - Document management tables and relationships
+
 ## Acknowledgments
 
 Built with:
 - [.NET](https://dotnet.microsoft.com/)
 - [Entity Framework Core](https://docs.microsoft.com/ef/core/)
 - [MediatR](https://github.com/jbogard/MediatR)
-- [OpenTelemetry](https://opentelemetry.io/)
+- [Azure Monitor OpenTelemetry](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable?tabs=aspnetcore)
+- [Azure Blob Storage](https://learn.microsoft.com/azure/storage/blobs/)
 - [Microsoft Identity Platform](https://learn.microsoft.com/azure/active-directory/develop/)
