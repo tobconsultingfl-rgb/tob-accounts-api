@@ -100,6 +100,9 @@ public class Account
     // Navigation property for related contacts
     public ICollection<Contact> Contacts { get; set; } = new List<Contact>();
 
+    // Navigation property for related documents
+    public ICollection<AccountDocument> Documents { get; set; } = new List<AccountDocument>();
+
     // Soft delete flag
     public bool IsActive { get; set; } = true;
 

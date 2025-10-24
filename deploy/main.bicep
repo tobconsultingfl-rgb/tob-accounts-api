@@ -132,14 +132,14 @@ module appService './modules/appService.bicep' = {
 }
 
 // Assign Storage Blob Data Contributor role to App Service managed identity
-module storageRoleAssignment './modules/storageRoleAssignment.bicep' = {
-  name: 'storageRoleAssignmentDeploy'
-  params: {
-    storageAccountName: storageAccount.outputs.storageAccountName
-    principalId: appService.outputs.appServicePrincipalId
-    roleAssignmentName: guid(subscription().subscriptionId, storageAccount.outputs.storageAccountId, appServiceName, 'Storage Blob Data Contributor')
-  }
-}
+// module storageRoleAssignment './modules/storageRoleAssignment.bicep' = {
+//   name: 'storageRoleAssignmentDeploy'
+//   params: {
+//     storageAccountName: storageAccount.outputs.storageAccountName
+//     principalId: appService.outputs.appServicePrincipalId
+//     roleAssignmentName: guid(subscription().subscriptionId, storageAccount.outputs.storageAccountId, appServiceName, 'Storage Blob Data Contributor')
+//   }
+// }
 
 module connectionStringSecret './modules/keyVaultSecret.bicep' = {
   name: 'databaseConnectionStringSecretDeploy'

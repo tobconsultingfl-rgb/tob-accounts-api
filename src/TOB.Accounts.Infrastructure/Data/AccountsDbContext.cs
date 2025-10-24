@@ -10,6 +10,7 @@ public class AccountsDbContext : DbContext
 
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Contact> Contacts { get; set; }
+    public DbSet<AccountDocument> AccountDocuments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -110,9 +111,47 @@ public class AccountsDbContext : DbContext
                 .HasDefaultValue(false);
         });
 
+        // Configure AccountDocument entity
+        modelBuilder.Entity<AccountDocument>(entity =>
+        {
+            entity.HasKey(e => e.DocumentId);
+
+            entity.HasIndex(e => e.TenantId)
+                .HasDatabaseName("IX_AccountDocuments_TenantId");
+
+            entity.HasIndex(e => e.AccountId)
+                .HasDatabaseName("IX_AccountDocuments_AccountId");
+
+            entity.HasIndex(e => new { e.TenantId, e.AccountId })
+                .HasDatabaseName("IX_AccountDocuments_TenantId_AccountId");
+
+            entity.HasIndex(e => e.Category)
+                .HasDatabaseName("IX_AccountDocuments_Category");
+
+            entity.HasIndex(e => e.IsActive)
+                .HasDatabaseName("IX_AccountDocuments_IsActive");
+
+            entity.HasIndex(e => e.CreatedAt)
+                .HasDatabaseName("IX_AccountDocuments_CreatedAt");
+
+            // Configure one-to-many relationship: Account -> AccountDocuments
+            entity.HasOne(d => d.Account)
+                .WithMany(a => a.Documents)
+                .HasForeignKey(d => d.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure default values
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.Property(e => e.IsActive)
+                .HasDefaultValue(true);
+        });
+
         // Global query filter for soft deletes
         modelBuilder.Entity<Account>().HasQueryFilter(a => a.IsActive);
         modelBuilder.Entity<Contact>().HasQueryFilter(c => c.IsActive);
+        modelBuilder.Entity<AccountDocument>().HasQueryFilter(d => d.IsActive);
     }
 
     public override int SaveChanges()

@@ -15,6 +15,7 @@ using TOB.Accounts.Domain.AppSettings;
 using TOB.Accounts.Infrastructure.Data;
 using TOB.Accounts.Infrastructure.Repositories;
 using TOB.Accounts.Infrastructure.Repositories.Implementations;
+using TOB.Accounts.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,11 @@ builder.Services.AddOptions<CorsOptions>()
 
 builder.Services.AddOptions<KeyVaultOptions>()
     .Bind(builder.Configuration.GetSection(KeyVaultOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+
+builder.Services.AddOptions<AzureStorageOptions>()
+    .Bind(builder.Configuration.GetSection(AzureStorageOptions.SectionName))
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
@@ -228,6 +234,10 @@ builder.Services.AddDbContext<AccountsDbContext>((serviceProvider, options) =>
 // Register repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IContactRepository, ContactRepository>();
+builder.Services.AddScoped<IAccountDocumentRepository, AccountDocumentRepository>();
+
+// Register services
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 
 // Add MediatR
 builder.Services.AddMediatR(cfg =>
