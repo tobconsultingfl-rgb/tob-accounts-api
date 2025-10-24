@@ -677,119 +677,359 @@ namespace TOB.Accounts.Infrastructure.Data.Migrations
                         new
                         {
                             IndustryId = new Guid("00000000-0000-0000-0002-000000000001"),
-                            Description = "Software, hardware, and IT services",
+                            Description = "Accounting and bookkeeping services",
                             DisplayOrder = 1,
                             IsActive = true,
-                            Name = "Technology"
+                            Name = "Accounting"
                         },
                         new
                         {
                             IndustryId = new Guid("00000000-0000-0000-0002-000000000002"),
-                            Description = "Medical and healthcare services",
+                            Description = "Advertising agencies and marketing services",
                             DisplayOrder = 2,
                             IsActive = true,
-                            Name = "Healthcare"
+                            Name = "Advertising & Marketing"
                         },
                         new
                         {
                             IndustryId = new Guid("00000000-0000-0000-0002-000000000003"),
-                            Description = "Banking, insurance, and financial institutions",
+                            Description = "Aerospace and defense industries",
                             DisplayOrder = 3,
                             IsActive = true,
-                            Name = "Financial Services"
+                            Name = "Aerospace & Defense"
                         },
                         new
                         {
                             IndustryId = new Guid("00000000-0000-0000-0002-000000000004"),
-                            Description = "Production and manufacturing",
+                            Description = "Agriculture, farming, and agribusiness",
                             DisplayOrder = 4,
-                            IsActive = true,
-                            Name = "Manufacturing"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000005"),
-                            Description = "Retail and e-commerce",
-                            DisplayOrder = 5,
-                            IsActive = true,
-                            Name = "Retail"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000006"),
-                            Description = "Educational institutions and services",
-                            DisplayOrder = 6,
-                            IsActive = true,
-                            Name = "Education"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000007"),
-                            Description = "Real estate and property management",
-                            DisplayOrder = 7,
-                            IsActive = true,
-                            Name = "Real Estate"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000008"),
-                            Description = "Professional consulting services",
-                            DisplayOrder = 8,
-                            IsActive = true,
-                            Name = "Consulting"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000009"),
-                            Description = "Transportation and logistics",
-                            DisplayOrder = 9,
-                            IsActive = true,
-                            Name = "Transportation"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000010"),
-                            Description = "Energy and utilities",
-                            DisplayOrder = 10,
-                            IsActive = true,
-                            Name = "Energy"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000011"),
-                            Description = "Media, entertainment, and publishing",
-                            DisplayOrder = 11,
-                            IsActive = true,
-                            Name = "Media & Entertainment"
-                        },
-                        new
-                        {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000012"),
-                            Description = "Agriculture and farming",
-                            DisplayOrder = 12,
                             IsActive = true,
                             Name = "Agriculture"
                         },
                         new
                         {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000005"),
+                            Description = "Architecture and engineering services",
+                            DisplayOrder = 5,
+                            IsActive = true,
+                            Name = "Architecture & Engineering"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000006"),
+                            Description = "Automotive manufacturing and services",
+                            DisplayOrder = 6,
+                            IsActive = true,
+                            Name = "Automotive"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000007"),
+                            Description = "Banking and financial institutions",
+                            DisplayOrder = 7,
+                            IsActive = true,
+                            Name = "Banking"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000008"),
+                            Description = "Biotechnology and life sciences",
+                            DisplayOrder = 8,
+                            IsActive = true,
+                            Name = "Biotechnology"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000009"),
+                            Description = "Chemical manufacturing and distribution",
+                            DisplayOrder = 9,
+                            IsActive = true,
+                            Name = "Chemicals"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000010"),
+                            Description = "Construction and building services",
+                            DisplayOrder = 10,
+                            IsActive = true,
+                            Name = "Construction"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000011"),
+                            Description = "Management and professional consulting",
+                            DisplayOrder = 11,
+                            IsActive = true,
+                            Name = "Consulting"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000012"),
+                            Description = "Consumer products and packaged goods",
+                            DisplayOrder = 12,
+                            IsActive = true,
+                            Name = "Consumer Goods"
+                        },
+                        new
+                        {
                             IndustryId = new Guid("00000000-0000-0000-0002-000000000013"),
-                            Description = "Telecommunications services",
+                            Description = "Online retail and e-commerce platforms",
                             DisplayOrder = 13,
                             IsActive = true,
-                            Name = "Telecommunications"
+                            Name = "E-commerce"
                         },
                         new
                         {
                             IndustryId = new Guid("00000000-0000-0000-0002-000000000014"),
-                            Description = "Hotels, restaurants, and hospitality",
+                            Description = "Educational institutions and services",
                             DisplayOrder = 14,
+                            IsActive = true,
+                            Name = "Education"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000015"),
+                            Description = "Energy production and utility services",
+                            DisplayOrder = 15,
+                            IsActive = true,
+                            Name = "Energy & Utilities"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000016"),
+                            Description = "Entertainment and event services",
+                            DisplayOrder = 16,
+                            IsActive = true,
+                            Name = "Entertainment"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000017"),
+                            Description = "Environmental and sustainability services",
+                            DisplayOrder = 17,
+                            IsActive = true,
+                            Name = "Environmental Services"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000018"),
+                            Description = "Financial planning and investment services",
+                            DisplayOrder = 18,
+                            IsActive = true,
+                            Name = "Financial Services"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000019"),
+                            Description = "Food and beverage production and services",
+                            DisplayOrder = 19,
+                            IsActive = true,
+                            Name = "Food & Beverage"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000020"),
+                            Description = "Government agencies and public sector",
+                            DisplayOrder = 20,
+                            IsActive = true,
+                            Name = "Government"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000021"),
+                            Description = "Healthcare providers and medical services",
+                            DisplayOrder = 21,
+                            IsActive = true,
+                            Name = "Healthcare"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000022"),
+                            Description = "Hotels, resorts, and hospitality services",
+                            DisplayOrder = 22,
                             IsActive = true,
                             Name = "Hospitality"
                         },
                         new
                         {
-                            IndustryId = new Guid("00000000-0000-0000-0002-000000000015"),
-                            Description = "Other industries",
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000023"),
+                            Description = "HR services and staffing agencies",
+                            DisplayOrder = 23,
+                            IsActive = true,
+                            Name = "Human Resources"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000024"),
+                            Description = "IT services and technology consulting",
+                            DisplayOrder = 24,
+                            IsActive = true,
+                            Name = "Information Technology"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000025"),
+                            Description = "Insurance providers and brokers",
+                            DisplayOrder = 25,
+                            IsActive = true,
+                            Name = "Insurance"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000026"),
+                            Description = "Law firms and legal services",
+                            DisplayOrder = 26,
+                            IsActive = true,
+                            Name = "Legal Services"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000027"),
+                            Description = "Logistics and supply chain management",
+                            DisplayOrder = 27,
+                            IsActive = true,
+                            Name = "Logistics & Supply Chain"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000028"),
+                            Description = "Industrial and product manufacturing",
+                            DisplayOrder = 28,
+                            IsActive = true,
+                            Name = "Manufacturing"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000029"),
+                            Description = "Media, publishing, and broadcasting",
+                            DisplayOrder = 29,
+                            IsActive = true,
+                            Name = "Media & Publishing"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000030"),
+                            Description = "Mining, metals, and mineral extraction",
+                            DisplayOrder = 30,
+                            IsActive = true,
+                            Name = "Mining & Metals"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000031"),
+                            Description = "Non-profit organizations and charities",
+                            DisplayOrder = 31,
+                            IsActive = true,
+                            Name = "Non-Profit"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000032"),
+                            Description = "Oil and gas exploration and production",
+                            DisplayOrder = 32,
+                            IsActive = true,
+                            Name = "Oil & Gas"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000033"),
+                            Description = "Pharmaceutical development and distribution",
+                            DisplayOrder = 33,
+                            IsActive = true,
+                            Name = "Pharmaceuticals"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000034"),
+                            Description = "Real estate and property management",
+                            DisplayOrder = 34,
+                            IsActive = true,
+                            Name = "Real Estate"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000035"),
+                            Description = "Restaurants and food service",
+                            DisplayOrder = 35,
+                            IsActive = true,
+                            Name = "Restaurants"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000036"),
+                            Description = "Retail stores and shops",
+                            DisplayOrder = 36,
+                            IsActive = true,
+                            Name = "Retail"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000037"),
+                            Description = "Security services and products",
+                            DisplayOrder = 37,
+                            IsActive = true,
+                            Name = "Security"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000038"),
+                            Description = "Software development and SaaS",
+                            DisplayOrder = 38,
+                            IsActive = true,
+                            Name = "Software"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000039"),
+                            Description = "Sports, fitness, and recreational services",
+                            DisplayOrder = 39,
+                            IsActive = true,
+                            Name = "Sports & Recreation"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000040"),
+                            Description = "Telecommunications and internet services",
+                            DisplayOrder = 40,
+                            IsActive = true,
+                            Name = "Telecommunications"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000041"),
+                            Description = "Textiles, apparel, and fashion",
+                            DisplayOrder = 41,
+                            IsActive = true,
+                            Name = "Textiles & Apparel"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000042"),
+                            Description = "Transportation and shipping services",
+                            DisplayOrder = 42,
+                            IsActive = true,
+                            Name = "Transportation"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000043"),
+                            Description = "Travel agencies and tourism services",
+                            DisplayOrder = 43,
+                            IsActive = true,
+                            Name = "Travel & Tourism"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000044"),
+                            Description = "Wholesale and distribution services",
+                            DisplayOrder = 44,
+                            IsActive = true,
+                            Name = "Wholesale & Distribution"
+                        },
+                        new
+                        {
+                            IndustryId = new Guid("00000000-0000-0000-0002-000000000099"),
+                            Description = "Other industries not listed",
                             DisplayOrder = 99,
                             IsActive = true,
                             Name = "Other"
