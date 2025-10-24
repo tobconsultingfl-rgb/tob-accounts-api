@@ -1,16 +1,12 @@
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
 using TOB.Accounts.API.Exceptions;
-using TOB.Accounts.API.Telemetry;
 using TOB.Accounts.Domain.AppSettings;
 using TOB.Accounts.Infrastructure.Data;
 using TOB.Accounts.Infrastructure.Repositories;
@@ -43,11 +39,6 @@ builder.Services.AddOptions<AzureAdOptions>()
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
-builder.Services.AddOptions<OpenTelemetryOptions>()
-    .Bind(builder.Configuration.GetSection(OpenTelemetryOptions.SectionName))
-    .ValidateDataAnnotations()
-    .ValidateOnStart();
-
 builder.Services.AddOptions<CorsOptions>()
     .Bind(builder.Configuration.GetSection(CorsOptions.SectionName))
     .ValidateDataAnnotations()
@@ -64,110 +55,12 @@ builder.Services.AddOptions<AzureStorageOptions>()
     .ValidateOnStart();
 
 // Get configuration options
-var otelOptions = builder.Configuration.GetSection(OpenTelemetryOptions.SectionName).Get<OpenTelemetryOptions>()!;
 var corsOptions = builder.Configuration.GetSection(CorsOptions.SectionName).Get<CorsOptions>()!;
 
-// Configure OpenTelemetry
-builder.Services.AddOpenTelemetry()
-    .ConfigureResource(resource => resource
-        .AddService(otelOptions.ServiceName, serviceVersion: otelOptions.ServiceVersion)
-        .AddAttributes(new Dictionary<string, object>
-        {
-            ["deployment.environment"] = builder.Environment.EnvironmentName,
-            ["host.name"] = Environment.MachineName
-        }))
-    .WithTracing(tracing =>
-    {
-        if (!otelOptions.EnableTracing) return;
-
-        tracing
-            .AddAspNetCoreInstrumentation(options =>
-            {
-                options.RecordException = true;
-                options.EnrichWithHttpRequest = (activity, httpRequest) =>
-                {
-                    activity.SetTag("http.request.user_agent", httpRequest.Headers.UserAgent.ToString());
-                };
-                options.EnrichWithHttpResponse = (activity, httpResponse) =>
-                {
-                    activity.SetTag("http.response.content_length", httpResponse.ContentLength);
-                };
-            })
-            .AddHttpClientInstrumentation(options =>
-            {
-                options.RecordException = true;
-                options.EnrichWithHttpRequestMessage = (activity, httpRequestMessage) =>
-                {
-                    activity.SetTag("http.request.method", httpRequestMessage.Method.Method);
-                };
-            })
-            .AddEntityFrameworkCoreInstrumentation(options =>
-            {
-                options.SetDbStatementForText = true;
-                options.SetDbStatementForStoredProcedure = true;
-                options.EnrichWithIDbCommand = (activity, command) =>
-                {
-                    activity.SetTag("db.query.parameters", command.Parameters.Count);
-                };
-            })
-            .AddSource(Diagnostics.ActivitySource.Name);
-
-        if (otelOptions.UseConsoleExporter)
-        {
-            tracing.AddConsoleExporter();
-        }
-        else
-        {
-            tracing.AddOtlpExporter(options =>
-            {
-                options.Endpoint = new Uri(otelOptions.OtlpEndpoint);
-            });
-        }
-    })
-    .WithMetrics(metrics =>
-    {
-        if (!otelOptions.EnableMetrics) return;
-
-        metrics
-            .AddAspNetCoreInstrumentation()
-            .AddHttpClientInstrumentation()
-            .AddRuntimeInstrumentation()
-            .AddMeter(Diagnostics.Meter.Name);
-
-        if (otelOptions.UseConsoleExporter)
-        {
-            metrics.AddConsoleExporter();
-        }
-        else
-        {
-            metrics.AddOtlpExporter(options =>
-            {
-                options.Endpoint = new Uri(otelOptions.OtlpEndpoint);
-            });
-        }
-    });
-
-// Configure OpenTelemetry Logging
-if (otelOptions.EnableLogging)
-{
-    builder.Logging.AddOpenTelemetry(logging =>
-    {
-        logging.IncludeFormattedMessage = true;
-        logging.IncludeScopes = true;
-
-        if (otelOptions.UseConsoleExporter)
-        {
-            logging.AddConsoleExporter();
-        }
-        else
-        {
-            logging.AddOtlpExporter(options =>
-            {
-                options.Endpoint = new Uri(otelOptions.OtlpEndpoint);
-            });
-        }
-    });
-}
+// Configure Azure Monitor OpenTelemetry
+// This will automatically send telemetry to Application Insights using the connection string
+// from APPLICATIONINSIGHTS_CONNECTION_STRING environment variable or appsettings
+builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 // Add Global Exception Handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

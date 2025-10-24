@@ -69,18 +69,6 @@ var appConfigSettings = [
     name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
     value: '~3'
   }
-  {
-    name: 'AzureStorage__ConnectionString'
-    value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.outputs.storageAccountName};AccountKey=${storageAccount.outputs.storageAccountKey};EndpointSuffix=core.windows.net'
-  }
-  {
-    name: 'AzureStorage__BlobEndpoint'
-    value: storageAccount.outputs.blobEndpoint
-  }
-  {
-    name: 'AzureStorage__AccountName'
-    value: storageAccount.outputs.storageAccountName
-  }
 ]
 
 module database './modules/sqlDatabase.bicep' = {
@@ -140,6 +128,33 @@ module appService './modules/appService.bicep' = {
 //     roleAssignmentName: guid(subscription().subscriptionId, storageAccount.outputs.storageAccountId, appServiceName, 'Storage Blob Data Contributor')
 //   }
 // }
+
+module storageAccountSecret './modules/keyVaultSecret.bicep' = {
+  name: 'storageAccountNameSecretDeploy'
+  params: {
+    keyVaultName: keyVaultName
+    secretName: 'AzureStorage--AccountName'
+    secretValue: storageAccount.outputs.storageAccountName
+  }
+}
+
+module blobEndpointSecret './modules/keyVaultSecret.bicep' = {
+  name: 'storageBlobEndpointSecretDeploy'
+  params: {
+    keyVaultName: keyVaultName
+    secretName: 'AzureStorage--BlobEndpoint'
+    secretValue: storageAccount.outputs.blobEndpoint
+  }
+}
+
+module storageConnectionStringSecret './modules/keyVaultSecret.bicep' = {
+  name: 'storageConnectionStringSecretDeploy'
+  params: {
+    keyVaultName: keyVaultName
+    secretName: 'AzureStorage--ConnectionString'
+    secretValue: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.outputs.storageAccountName};AccountKey=${storageAccount.outputs.storageAccountKey};EndpointSuffix=core.windows.net'
+  }
+} 
 
 module connectionStringSecret './modules/keyVaultSecret.bicep' = {
   name: 'databaseConnectionStringSecretDeploy'
