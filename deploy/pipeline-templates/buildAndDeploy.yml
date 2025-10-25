@@ -26,13 +26,13 @@ jobs:
     displayName: dotnet build
     inputs:
       command: build
-      projects: '**/*.sln'
+      projects: 'src/**/*.csproj'
 
   - task: DotNetCoreCLI@2
     displayName: dotnet test
     inputs:
       command: test
-      projects: '**/*Test.csproj'
+      projects: '**/*Tests.csproj'
       arguments: '--configuration Release --collect:"XPlat Code Coverage" --logger trx'
 
   - task: PublishTestResults@2
