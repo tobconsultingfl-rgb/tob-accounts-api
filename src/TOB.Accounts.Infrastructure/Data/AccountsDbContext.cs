@@ -223,6 +223,9 @@ public class AccountsDbContext : DbContext
         // Seed data for lookup tables
         SeedLookupData(modelBuilder);
 
+        // Seed Fortune 25 accounts
+        SeedAccountData(modelBuilder);
+
         // Global query filter for soft deletes
         modelBuilder.Entity<Account>().HasQueryFilter(a => a.IsActive);
         modelBuilder.Entity<Contact>().HasQueryFilter(c => c.IsActive);
@@ -298,6 +301,355 @@ public class AccountsDbContext : DbContext
             new Industry { IndustryId = Guid.Parse("00000000-0000-0000-0002-000000000043"), Name = "Travel & Tourism", Description = "Travel agencies and tourism services", IsActive = true, DisplayOrder = 43 },
             new Industry { IndustryId = Guid.Parse("00000000-0000-0000-0002-000000000044"), Name = "Wholesale & Distribution", Description = "Wholesale and distribution services", IsActive = true, DisplayOrder = 44 },
             new Industry { IndustryId = Guid.Parse("00000000-0000-0000-0002-000000000099"), Name = "Other", Description = "Other industries not listed", IsActive = true, DisplayOrder = 99 }
+        );
+    }
+
+    private void SeedAccountData(ModelBuilder modelBuilder)
+    {
+        var tenantId = "A8D1B6F8-D91A-4641-AFE1-04FADA37C2AE";
+        var customerTypeId = Guid.Parse("00000000-0000-0000-0000-000000000001"); // Customer
+        var activeStatusId = Guid.Parse("00000000-0000-0000-0001-000000000001"); // Active
+
+        // Industry IDs from seed data
+        var retailIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000036");
+        var ecommerceIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000013");
+        var healthcareIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000021");
+        var itIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000024");
+        var insuranceIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000025");
+        var oilGasIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000032");
+        var pharmaceuticalsIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000033");
+        var bankingIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000007");
+        var automotiveIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000006");
+        var financialServicesIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000018");
+        var softwareIndustryId = Guid.Parse("00000000-0000-0000-0002-000000000038");
+
+        // Seed Fortune 25 Companies
+        modelBuilder.Entity<Account>().HasData(
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000001"),
+                TenantId = tenantId,
+                Name = "Walmart Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = retailIndustryId,
+                Website = "https://www.walmart.com",
+                Description = "Multinational retail corporation operating hypermarkets, discount stores, and grocery stores",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000002"),
+                TenantId = tenantId,
+                Name = "Amazon.com Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = ecommerceIndustryId,
+                Website = "https://www.amazon.com",
+                Description = "Global technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000003"),
+                TenantId = tenantId,
+                Name = "UnitedHealth Group Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = healthcareIndustryId,
+                Website = "https://www.unitedhealthgroup.com",
+                Description = "Diversified health care company offering health insurance and health care services",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000004"),
+                TenantId = tenantId,
+                Name = "Apple Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = itIndustryId,
+                Website = "https://www.apple.com",
+                Description = "Technology company designing and manufacturing consumer electronics, software, and online services",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000005"),
+                TenantId = tenantId,
+                Name = "CVS Health Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = healthcareIndustryId,
+                Website = "https://www.cvshealth.com",
+                Description = "Healthcare company providing pharmacy services, health insurance, and retail clinics",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000006"),
+                TenantId = tenantId,
+                Name = "Berkshire Hathaway Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = insuranceIndustryId,
+                Website = "https://www.berkshirehathaway.com",
+                Description = "Multinational conglomerate holding company with diverse business interests including insurance, railroads, and utilities",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000007"),
+                TenantId = tenantId,
+                Name = "Alphabet Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = itIndustryId,
+                Website = "https://www.abc.xyz",
+                Description = "Multinational conglomerate and parent company of Google, specializing in internet services and products",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000008"),
+                TenantId = tenantId,
+                Name = "Exxon Mobil Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = oilGasIndustryId,
+                Website = "https://www.exxonmobil.com",
+                Description = "American multinational oil and gas corporation engaged in exploration, production, and refining",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000009"),
+                TenantId = tenantId,
+                Name = "McKesson Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = pharmaceuticalsIndustryId,
+                Website = "https://www.mckesson.com",
+                Description = "Healthcare company providing pharmaceuticals and medical supplies distribution services",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000010"),
+                TenantId = tenantId,
+                Name = "Cencora Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = pharmaceuticalsIndustryId,
+                Website = "https://www.cencora.com",
+                Description = "Pharmaceutical sourcing and distribution services company",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000011"),
+                TenantId = tenantId,
+                Name = "Costco Wholesale Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = retailIndustryId,
+                Website = "https://www.costco.com",
+                Description = "Multinational corporation operating membership-only warehouse clubs",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000012"),
+                TenantId = tenantId,
+                Name = "JPMorgan Chase & Co.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = bankingIndustryId,
+                Website = "https://www.jpmorganchase.com",
+                Description = "Multinational investment bank and financial services holding company",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000013"),
+                TenantId = tenantId,
+                Name = "Cardinal Health Inc.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = pharmaceuticalsIndustryId,
+                Website = "https://www.cardinalhealth.com",
+                Description = "Healthcare services company providing pharmaceuticals and medical products distribution",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000014"),
+                TenantId = tenantId,
+                Name = "Chevron Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = oilGasIndustryId,
+                Website = "https://www.chevron.com",
+                Description = "Multinational energy corporation engaged in oil and gas exploration, production, and refining",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000015"),
+                TenantId = tenantId,
+                Name = "Ford Motor Company",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = automotiveIndustryId,
+                Website = "https://www.ford.com",
+                Description = "American multinational automobile manufacturer designing and selling vehicles and automotive parts",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000016"),
+                TenantId = tenantId,
+                Name = "General Motors Company",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = automotiveIndustryId,
+                Website = "https://www.gm.com",
+                Description = "American multinational automotive manufacturing company producing vehicles under multiple brands",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000017"),
+                TenantId = tenantId,
+                Name = "Marathon Petroleum Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = oilGasIndustryId,
+                Website = "https://www.marathonpetroleum.com",
+                Description = "American petroleum refining, marketing, and transportation company",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000018"),
+                TenantId = tenantId,
+                Name = "Centene Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = healthcareIndustryId,
+                Website = "https://www.centene.com",
+                Description = "Managed care organization providing health insurance programs and services",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000019"),
+                TenantId = tenantId,
+                Name = "Bank of America Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = bankingIndustryId,
+                Website = "https://www.bankofamerica.com",
+                Description = "Multinational investment bank and financial services holding company",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000020"),
+                TenantId = tenantId,
+                Name = "Phillips 66",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = oilGasIndustryId,
+                Website = "https://www.phillips66.com",
+                Description = "Energy manufacturing and logistics company specializing in refining, chemicals, and midstream operations",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000021"),
+                TenantId = tenantId,
+                Name = "The Cigna Group",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = insuranceIndustryId,
+                Website = "https://www.cigna.com",
+                Description = "Global health services company providing insurance and related health care products and services",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000022"),
+                TenantId = tenantId,
+                Name = "Microsoft Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = softwareIndustryId,
+                Website = "https://www.microsoft.com",
+                Description = "Technology corporation developing computer software, consumer electronics, and cloud computing services",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000023"),
+                TenantId = tenantId,
+                Name = "Valero Energy Corporation",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = oilGasIndustryId,
+                Website = "https://www.valero.com",
+                Description = "Multinational manufacturer and marketer of petroleum-based and low-carbon liquid fuels",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000024"),
+                TenantId = tenantId,
+                Name = "The Kroger Co.",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = retailIndustryId,
+                Website = "https://www.thekrogerco.com",
+                Description = "Retail company operating supermarkets and multi-department stores",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Account
+            {
+                AccountId = Guid.Parse("00000000-0000-0000-0003-000000000025"),
+                TenantId = tenantId,
+                Name = "Fannie Mae",
+                AccountTypeId = customerTypeId,
+                AccountStatusId = activeStatusId,
+                IndustryId = financialServicesIndustryId,
+                Website = "https://www.fanniemae.com",
+                Description = "Government-sponsored enterprise providing liquidity and stability to the U.S. housing and mortgage markets",
+                IsActive = true,
+                CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
         );
     }
 
